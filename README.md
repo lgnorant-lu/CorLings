@@ -1,7 +1,7 @@
 # Cursor Rules 教程系列 (CorLings)
 
 <div align="center">
-  <img src="./images/CorLings.png" alt="CorLings" width="1000" />
+  <img src="./images/CorLings.png" alt="CorLings" width="500" />
   <h3>通过结构化学习掌握Cursor Rules的艺术</h3>
 </div>
 
