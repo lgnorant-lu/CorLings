@@ -28,13 +28,25 @@ CorLings (Cursor Rules Learnings) 是一套全面的、结构化的Cursor Rules�
 7. **[规则库管理](CorLings/07-RuleLibrary-Part1.md)** - 规则的组织、版本控制和维护
 8. **[实际案例研究](CorLings/08-CaseStudies-Part1.md)** - 真实项目中的应用实例
 9. **[高级架构](CorLings/09-AdvancedArchitecture-Part1.md)** - 多代理系统和自学习规则系统
-10. **未来发展方向** - 新特性、趋势和学习路径
+10. **[未来发展方向](CorLings/10-FutureDirections.md)** - 新特性、趋势和学习路径
 
 为便于阅读，一些章节被分为多个部分：
 - 第6章：[第一部分](CorLings/06-WorkflowIntegration-Part1.md) | [第二部分](CorLings/06-WorkflowIntegration-Part2.md) | [第三部分](CorLings/06-WorkflowIntegration-Part3.md)
 - 第7章：[第一部分](CorLings/07-RuleLibrary-Part1.md) | [第二部分](CorLings/07-RuleLibrary-Part2.md) | [第三部分](CorLings/07-RuleLibrary-Part3.md) | [第四部分](CorLings/07-RuleLibrary-Part4.md) | [第五部分](CorLings/07-RuleLibrary-Part5.md)
 - 第8章：[第一部分](CorLings/08-CaseStudies-Part1.md) | [第二部分](CorLings/08-CaseStudies-Part2.md) | [第三部分](CorLings/08-CaseStudies-Part3.md) | [第四部分](CorLings/08-CaseStudies-Part4.md)
 - 第9章：[第一部分](CorLings/09-AdvancedArchitecture-Part1.md) | [第二部分](CorLings/09-AdvancedArchitecture-Part2.md)
+
+## 辅助资源
+
+除了核心教程章节外，我们还提供以下辅助资源，帮助您更好地学习和应用Cursor Rules：
+
+1. **[用户指南](CorLings/UserGuide.md)** - 提供教程使用方法、学习路径建议和最佳实践
+2. **[故障排除指南](CorLings/Troubleshooting.md)** - 收集常见错误和解决方案的参考手册
+3. **[贡献指南](CorLings/CONTRIBUTING.md)** - 说明如何为教程项目贡献内容和改进
+4. **[PDF生成脚本](CorLings/GeneratePDF.ps1)** - 用于将所有教程内容合并为PDF文档的工具
+5. **[术语表](CorLings/Glossary.md)** - Cursor Rules相关术语的定义和解释
+
+这些资源文件可以帮助您更有效地使用教程内容，解决实际问题，并参与到教程的持续改进中。
 
 ## 特色内容
 
