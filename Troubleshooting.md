@@ -193,25 +193,6 @@ pattern: "<div[^>]*>.*?<\/div>"
 | 换行符不一致 | 混用 CRLF 和 LF | 统一使用一种换行符，或在处理中兼容两种 | 第4章：基础规则编写 |
 | 环境变量获取失败 | 环境变量访问语法不同 | 使用 `%VARIABLE%` 或 PowerShell 的 `$env:VARIABLE` | 第6章：工作流集成 |
 
-### Windows 路径处理示例
-
-错误的路径处理：
-```javascript
-const configPath = "C:/Users/username/cursor/rules";
-```
-
-修复后：
-```javascript
-// 方法1：使用双反斜杠
-const configPath = "C:\\Users\\username\\cursor\\rules";
-
-// 方法2：使用原始字符串（在支持的语言中）
-const configPath = r"C:\Users\username\cursor\rules";
-
-// 方法3：使用 path.join (Node.js)
-const configPath = path.join("C:", "Users", "username", "cursor", "rules");
-```
-
 ## 规则冲突
 
 | 错误现象 | 可能原因 | 解决方案 | 参考章节 |
