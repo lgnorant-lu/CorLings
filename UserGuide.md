@@ -158,8 +158,10 @@ A: 参考第 10 章"未来发展方向"中的社区资源和学习路径部分�
 # Unix/Linux/macOS
 pandoc CorLings/*.md -o CorLings-Tutorial.pdf --toc --toc-depth=3 --pdf-engine=wkhtmltopdf
 
-# Windows PowerShell
-pandoc (Get-ChildItem -Path .\CorLings\*.md | Sort-Object Name) -o CorLings-Tutorial.pdf --toc --toc-depth=3 --pdf-engine=wkhtmltopdf
+# Windows CMD
+for /f "tokens=*" %%a in ('dir /b /o:n .\CorLings\*.md') do @echo %%a >> files_list.txt
+pandoc @files_list.txt -o CorLings-Tutorial.pdf --toc --toc-depth=3 --pdf-engine=wkhtmltopdf
+del files_list.txt
 ```
 
 ### 使用 VSCode 扩展

@@ -67,20 +67,39 @@ mkdir -p shared
 mkdir -p metadata
 ```
 
-在Windows PowerShell中，可以使用以下命令：
+在Terminal中，可以使用以下命令：
 
-```powershell
+**CMD**
+```CMD
+# Windows CMD
+@echo off
+rem 创建规则库目录
+set libraryPath=%USERPROFILE%\cursor-rules-library
+if not exist "%libraryPath%" mkdir "%libraryPath%"
+
+rem 创建基本目录结构
+if not exist "%libraryPath%\categories\code-quality" mkdir "%libraryPath%\categories\code-quality"
+if not exist "%libraryPath%\categories\workflow" mkdir "%libraryPath%\categories\workflow"
+if not exist "%libraryPath%\categories\documentation" mkdir "%libraryPath%\categories\documentation"
+if not exist "%libraryPath%\templates" mkdir "%libraryPath%\templates"
+if not exist "%libraryPath%\shared" mkdir "%libraryPath%\shared"
+if not exist "%libraryPath%\metadata" mkdir "%libraryPath%\metadata"
+
+**Linux/macOS**
+```bash
+# Linux/macOS
+#!/bin/bash
 # 创建规则库目录
-$libraryPath = "$HOME\cursor-rules-library"
-New-Item -Path $libraryPath -ItemType Directory -Force
+libraryPath="$HOME/cursor-rules-library"
+mkdir -p "$libraryPath"
 
 # 创建基本目录结构
-New-Item -Path "$libraryPath\categories\code-quality" -ItemType Directory -Force
-New-Item -Path "$libraryPath\categories\workflow" -ItemType Directory -Force
-New-Item -Path "$libraryPath\categories\documentation" -ItemType Directory -Force
-New-Item -Path "$libraryPath\templates" -ItemType Directory -Force
-New-Item -Path "$libraryPath\shared" -ItemType Directory -Force
-New-Item -Path "$libraryPath\metadata" -ItemType Directory -Force
+mkdir -p "$libraryPath/categories/code-quality"
+mkdir -p "$libraryPath/categories/workflow"
+mkdir -p "$libraryPath/categories/documentation"
+mkdir -p "$libraryPath/templates"
+mkdir -p "$libraryPath/shared"
+mkdir -p "$libraryPath/metadata"
 ```
 
 ### 创建规则库清单
@@ -107,12 +126,41 @@ cat > ~/cursor-rules-library/library.json << EOL
 EOL
 ```
 
-在Windows PowerShell中，可以这样创建：
+在Terminal中，可以这样创建：
 
-```powershell
+**CMD**
+```CMD
+# Windows CMD
+@echo off
+rem 创建规则库清单
+for /f "tokens=2-4 delims=/ " %%a in ('date /t') do (
+    set currentDate=%%c-%%a-%%b
+)
+
+echo {> "%libraryPath%\library.json"
+echo   "name": "Personal Cursor Rules Library",>> "%libraryPath%\library.json"
+echo   "description": "我的个人Cursor规则集合",>> "%libraryPath%\library.json"
+echo   "version": "1.0.0",>> "%libraryPath%\library.json"
+echo   "author": "Your Name",>> "%libraryPath%\library.json"
+echo   "created": "%currentDate%",>> "%libraryPath%\library.json"
+echo   "updated": "%currentDate%",>> "%libraryPath%\library.json"
+echo   "categories": [>> "%libraryPath%\library.json"
+echo     "code-quality",>> "%libraryPath%\library.json"
+echo     "workflow",>> "%libraryPath%\library.json"
+echo     "documentation">> "%libraryPath%\library.json"
+echo   ],>> "%libraryPath%\library.json"
+echo   "rules_count": 0>> "%libraryPath%\library.json"
+echo }>> "%libraryPath%\library.json"
+```
+
+**Linux/macOS**
+```bash
+# Linux/macOS
+#!/bin/bash
 # 创建规则库清单
-$currentDate = Get-Date -Format "yyyy-MM-dd"
-$libraryJson = @"
+currentDate=$(date +"%Y-%m-%d")
+
+cat > "$libraryPath/library.json" << EOF
 {
   "name": "Personal Cursor Rules Library",
   "description": "我的个人Cursor规则集合",
@@ -127,8 +175,7 @@ $libraryJson = @"
   ],
   "rules_count": 0
 }
-"@
-$libraryJson | Set-Content -Path "$libraryPath\library.json"
+EOF
 ```
 
 ### 创建规则模板
@@ -169,12 +216,55 @@ metadata:
 EOL
 ```
 
-在Windows PowerShell中：
+在Terminal中：
 
-```powershell
+**CMD**
+```CMD
+# Windows CMD
+@echo off
+rem 创建基本规则模板
+for /f "tokens=2-4 delims=/ " %%a in ('date /t') do (
+    set currentDate=%%c-%%a-%%b
+)
+
+echo --->> "%libraryPath%\templates\basic-rule.mdc"
+echo description: 规则描述>> "%libraryPath%\templates\basic-rule.mdc"
+echo globs: **/*>> "%libraryPath%\templates\basic-rule.mdc"
+echo --->> "%libraryPath%\templates\basic-rule.mdc"
+echo # 规则标题>> "%libraryPath%\templates\basic-rule.mdc"
+echo.>> "%libraryPath%\templates\basic-rule.mdc"
+echo ^<rule^>>> "%libraryPath%\templates\basic-rule.mdc"
+echo name: rule_name>> "%libraryPath%\templates\basic-rule.mdc"
+echo description: 详细描述规则的用途>> "%libraryPath%\templates\basic-rule.mdc"
+echo.>> "%libraryPath%\templates\basic-rule.mdc"
+echo filters:>> "%libraryPath%\templates\basic-rule.mdc"
+echo   - type: filter_type>> "%libraryPath%\templates\basic-rule.mdc"
+echo     pattern: "pattern">> "%libraryPath%\templates\basic-rule.mdc"
+echo.>> "%libraryPath%\templates\basic-rule.mdc"
+echo actions:>> "%libraryPath%\templates\basic-rule.mdc"
+echo   - type: action_type>> "%libraryPath%\templates\basic-rule.mdc"
+echo     message: ^|>> "%libraryPath%\templates\basic-rule.mdc"
+echo       消息内容>> "%libraryPath%\templates\basic-rule.mdc"
+echo.>> "%libraryPath%\templates\basic-rule.mdc"
+echo metadata:>> "%libraryPath%\templates\basic-rule.mdc"
+echo   priority: medium>> "%libraryPath%\templates\basic-rule.mdc"
+echo   version: 1.0.0>> "%libraryPath%\templates\basic-rule.mdc"
+echo   tags: ["tag1", "tag2"]>> "%libraryPath%\templates\basic-rule.mdc"
+echo   category: "category-name">> "%libraryPath%\templates\basic-rule.mdc"
+echo   author: "Your Name">> "%libraryPath%\templates\basic-rule.mdc"
+echo   created: "%currentDate%">> "%libraryPath%\templates\basic-rule.mdc"
+echo   updated: "%currentDate%">> "%libraryPath%\templates\basic-rule.mdc"
+echo ^</rule^>>> "%libraryPath%\templates\basic-rule.mdc"
+```
+
+**Linux/macOS**
+```bash
+# Linux/macOS
+#!/bin/bash
 # 创建基本规则模板
-$currentDate = Get-Date -Format "yyyy-MM-dd"
-$basicRuleTemplate = @"
+currentDate=$(date +"%Y-%m-%d")
+
+cat > "$libraryPath/templates/basic-rule.mdc" << 'EOF'
 ---
 description: 规则描述
 globs: **/*
@@ -200,11 +290,10 @@ metadata:
   tags: ["tag1", "tag2"]
   category: "category-name"
   author: "Your Name"
-  created: "$currentDate"
-  updated: "$currentDate"
+  created: "'$currentDate'"
+  updated: "'$currentDate'"
 </rule>
-"@
-$basicRuleTemplate | Set-Content -Path "$libraryPath\templates\basic-rule.mdc"
+EOF
 ```
 
 ### 添加示例规则
@@ -264,12 +353,76 @@ metadata:
 EOL
 ```
 
-在Windows PowerShell中：
+在Terminal中：
 
-```powershell
+**CMD**
+```CMD
+# Windows CMD
+@echo off
+rem 创建示例规则
+for /f "tokens=2-4 delims=/ " %%a in ('date /t') do (
+    set currentDate=%%c-%%a-%%b
+)
+
+set rulePath=%libraryPath%\categories\code-quality\js-best-practices.mdc
+
+echo --->> "%rulePath%"
+echo description: JavaScript最佳实践检查>> "%rulePath%"
+echo globs: **/*.js,**/*.jsx,**/*.ts,**/*.tsx>> "%rulePath%"
+echo --->> "%rulePath%"
+echo # JavaScript最佳实践>> "%rulePath%"
+echo.>> "%rulePath%"
+echo ^<rule^>>> "%rulePath%"
+echo name: js_best_practices>> "%rulePath%"
+echo description: 检查JavaScript代码中的常见最佳实践>> "%rulePath%"
+echo.>> "%rulePath%"
+echo filters:>> "%rulePath%"
+echo   - type: file_extension>> "%rulePath%"
+echo     pattern: "\\.(js^|jsx^|ts^|tsx)$">> "%rulePath%"
+echo.>> "%rulePath%"
+echo   - type: content>> "%rulePath%"
+echo     pattern: "var\\s+\\w+">> "%rulePath%"
+echo.>> "%rulePath%"
+echo actions:>> "%rulePath%"
+echo   - type: suggest>> "%rulePath%"
+echo     message: ^|>> "%rulePath%"
+echo       ## JavaScript最佳实践建议>> "%rulePath%"
+echo.>> "%rulePath%"      
+echo       检测到使用 `var` 声明变量。推荐使用 `const` 或 `let` 来声明变量，以获得更好的作用域控制：>> "%rulePath%"
+echo.>> "%rulePath%"      
+echo       ```javascript>> "%rulePath%"
+echo       // 不推荐>> "%rulePath%"
+echo       var x = 10;>> "%rulePath%"
+echo.>> "%rulePath%"      
+echo       // 推荐>> "%rulePath%"
+echo       const x = 10; // 对于不会改变的值>> "%rulePath%"
+echo       let y = 20;   // 对于可能会改变的值>> "%rulePath%"
+echo       ```>> "%rulePath%"
+echo.>> "%rulePath%"      
+echo       使用 `const` 和 `let` 的好处：>> "%rulePath%"
+echo       - 块级作用域，避免变量提升问题>> "%rulePath%"
+echo       - `const` 可以防止变量被意外重新赋值>> "%rulePath%"
+echo       - 代码更容易理解和维护>> "%rulePath%"
+echo.>> "%rulePath%"
+echo metadata:>> "%rulePath%"
+echo   priority: high>> "%rulePath%"
+echo   version: 1.0.0>> "%rulePath%"
+echo   tags: ["javascript", "best-practices", "code-quality"]>> "%rulePath%"
+echo   category: "code-quality">> "%rulePath%"
+echo   author: "Your Name">> "%rulePath%"
+echo   created: "%currentDate%">> "%rulePath%"
+echo   updated: "%currentDate%">> "%rulePath%"
+echo ^</rule^>>> "%rulePath%"
+```
+
+**Linux/macOS**
+```bash
+# Linux/macOS
+#!/bin/bash
 # 创建示例规则
-$currentDate = Get-Date -Format "yyyy-MM-dd"
-$jsBestPracticesRule = @"
+currentDate=$(date +"%Y-%m-%d")
+
+cat > "$libraryPath/categories/code-quality/js-best-practices.mdc" << 'EOF'
 ---
 description: JavaScript最佳实践检查
 globs: **/*.js,**/*.jsx,**/*.ts,**/*.tsx
@@ -292,7 +445,7 @@ actions:
     message: |
       ## JavaScript最佳实践建议
       
-      检测到使用 \`var\` 声明变量。推荐使用 \`const\` 或 \`let\` 来声明变量，以获得更好的作用域控制：
+      检测到使用 `var` 声明变量。推荐使用 `const` 或 `let` 来声明变量，以获得更好的作用域控制：
       
       ```javascript
       // 不推荐
@@ -303,9 +456,9 @@ actions:
       let y = 20;   // 对于可能会改变的值
       ```
       
-      使用 \`const\` 和 \`let\` 的好处：
+      使用 `const` 和 `let` 的好处：
       - 块级作用域，避免变量提升问题
-      - \`const\` 可以防止变量被意外重新赋值
+      - `const` 可以防止变量被意外重新赋值
       - 代码更容易理解和维护
 
 metadata:
@@ -314,11 +467,10 @@ metadata:
   tags: ["javascript", "best-practices", "code-quality"]
   category: "code-quality"
   author: "Your Name"
-  created: "$currentDate"
-  updated: "$currentDate"
+  created: "'$currentDate'"
+  updated: "'$currentDate'"
 </rule>
-"@
-$jsBestPracticesRule | Set-Content -Path "$libraryPath\categories\code-quality\js-best-practices.mdc"
+EOF
 ```
 
 ### 创建规则库索引
@@ -346,12 +498,42 @@ cat > ~/cursor-rules-library/rules-index.json << EOL
 EOL
 ```
 
-在Windows PowerShell中：
+在Terminal中：
 
-```powershell
+**CMD**
+```CMD
+# Windows CMD
+@echo off
+rem 创建规则库索引
+for /f "tokens=2-4 delims=/ " %%a in ('date /t') do (
+    set currentDate=%%c-%%a-%%b
+)
+
+echo {> "%libraryPath%\rules-index.json"
+echo   "rules": [>> "%libraryPath%\rules-index.json"
+echo     {>> "%libraryPath%\rules-index.json"
+echo       "id": "js_best_practices",>> "%libraryPath%\rules-index.json"
+echo       "name": "JavaScript最佳实践",>> "%libraryPath%\rules-index.json"
+echo       "description": "检查JavaScript代码中的常见最佳实践",>> "%libraryPath%\rules-index.json"
+echo       "path": "categories/code-quality/js-best-practices.mdc",>> "%libraryPath%\rules-index.json"
+echo       "category": "code-quality",>> "%libraryPath%\rules-index.json"
+echo       "tags": ["javascript", "best-practices", "code-quality"],>> "%libraryPath%\rules-index.json"
+echo       "version": "1.0.0",>> "%libraryPath%\rules-index.json"
+echo       "created": "%currentDate%",>> "%libraryPath%\rules-index.json"
+echo       "updated": "%currentDate%">> "%libraryPath%\rules-index.json"
+echo     }>> "%libraryPath%\rules-index.json"
+echo   ]>> "%libraryPath%\rules-index.json"
+echo }>> "%libraryPath%\rules-index.json"
+```
+
+**Linux/macOS**
+```bash
+# Linux/macOS
+#!/bin/bash
 # 创建规则库索引
-$currentDate = Get-Date -Format "yyyy-MM-dd"
-$rulesIndexJson = @"
+currentDate=$(date +"%Y-%m-%d")
+
+cat > "$libraryPath/rules-index.json" << EOF
 {
   "rules": [
     {
@@ -367,8 +549,7 @@ $rulesIndexJson = @"
     }
   ]
 }
-"@
-$rulesIndexJson | Set-Content -Path "$libraryPath\rules-index.json"
+EOF
 ```
 
 ### 创建规则库管理脚本
@@ -475,136 +656,197 @@ EOL
 chmod +x ~/cursor-rules-library/manage-library.sh
 ```
 
-在Windows PowerShell中，我们可以创建一个PowerShell脚本：
+在Terminal中，我们可以创建一个脚本：
 
-```powershell
+**CMD**
+```CMD
+# Windows CMD
+@echo off
+rem 创建规则库管理脚本
+set scriptPath=%libraryPath%\manage-library.bat
+
+echo @echo off> "%scriptPath%"
+echo rem Cursor规则库管理脚本>> "%scriptPath%"
+echo.>> "%scriptPath%"
+echo set libraryDir=%%USERPROFILE%%\cursor-rules-library>> "%scriptPath%"
+echo set rulesIndex=%%libraryDir%%\rules-index.json>> "%scriptPath%"
+echo set libraryJson=%%libraryDir%%\library.json>> "%scriptPath%"
+echo.>> "%scriptPath%"
+echo if "%%1"=="list" goto list_rules>> "%scriptPath%"
+echo if "%%1"=="find" goto find_rules>> "%scriptPath%"
+echo if "%%1"=="add" goto add_rule>> "%scriptPath%"
+echo if "%%1"=="update" goto update_rule>> "%scriptPath%"
+echo goto show_help>> "%scriptPath%"
+echo.>> "%scriptPath%"
+echo :show_help>> "%scriptPath%"
+echo echo Cursor规则库管理工具>> "%scriptPath%"
+echo echo.>> "%scriptPath%"
+echo echo 用法:>> "%scriptPath%"
+echo echo   manage-library.bat [命令] [参数]>> "%scriptPath%"
+echo echo.>> "%scriptPath%"
+echo echo 命令:>> "%scriptPath%"
+echo echo   list                列出所有规则>> "%scriptPath%"
+echo echo   add [模板] [路径]    添加新规则>> "%scriptPath%"
+echo echo   find [关键词]       搜索规则>> "%scriptPath%"
+echo echo   update [id] [路径]  更新规则>> "%scriptPath%"
+echo echo   help               显示帮助信息>> "%scriptPath%"
+echo exit /b>> "%scriptPath%"
+echo.>> "%scriptPath%"
+echo :list_rules>> "%scriptPath%"
+echo echo 规则库中的规则:>> "%scriptPath%"
+echo findstr /C:"id" "%%rulesIndex%%" | findstr /C:"name">> "%scriptPath%"
+echo exit /b>> "%scriptPath%"
+echo.>> "%scriptPath%"
+echo :find_rules>> "%scriptPath%"
+echo if "%%2"=="" (>> "%scriptPath%"
+echo   echo 错误: 请提供搜索关键词>> "%scriptPath%"
+echo   exit /b 1>> "%scriptPath%"
+echo )>> "%scriptPath%"
+echo.>> "%scriptPath%"
+echo echo 搜索关键词: %%2>> "%scriptPath%"
+echo findstr /C:"%%2" "%%rulesIndex%%">> "%scriptPath%"
+echo exit /b>> "%scriptPath%"
+echo.>> "%scriptPath%"
+echo :add_rule>> "%scriptPath%"
+echo if "%%2"=="" goto add_rule_error>> "%scriptPath%"
+echo if "%%3"=="" goto add_rule_error>> "%scriptPath%"
+echo.>> "%scriptPath%"
+echo set templatePath=%%libraryDir%%\templates\%%2.mdc>> "%scriptPath%"
+echo set targetPath=%%libraryDir%%\%%3>> "%scriptPath%"
+echo.>> "%scriptPath%"
+echo if not exist "%%templatePath%%" (>> "%scriptPath%"
+echo   echo 错误: 模板 '%%2' 不存在>> "%scriptPath%"
+echo   exit /b 1>> "%scriptPath%"
+echo )>> "%scriptPath%"
+echo.>> "%scriptPath%"
+echo for %%I in ("%%targetPath%%") do set targetDir=%%~dpI>> "%scriptPath%"
+echo if not exist "%%targetDir%%" mkdir "%%targetDir%%">> "%scriptPath%"
+echo.>> "%scriptPath%"
+echo copy "%%templatePath%%" "%%targetPath%%">> "%scriptPath%"
+echo echo 创建新规则: %%targetPath%%>> "%scriptPath%"
+echo echo 请编辑新创建的规则文件>> "%scriptPath%"
+echo exit /b>> "%scriptPath%"
+echo.>> "%scriptPath%"
+echo :add_rule_error>> "%scriptPath%"
+echo echo 错误: 请提供模板和目标路径>> "%scriptPath%"
+echo echo 用法: manage-library.bat add [模板] [路径]>> "%scriptPath%"
+echo exit /b 1>> "%scriptPath%"
+echo.>> "%scriptPath%"
+echo :update_rule>> "%scriptPath%"
+echo if "%%2"=="" goto update_rule_error>> "%scriptPath%"
+echo if "%%3"=="" goto update_rule_error>> "%scriptPath%"
+echo.>> "%scriptPath%"
+echo for /f "tokens=2-4 delims=/ " %%%%a in ('date /t') do (>> "%scriptPath%"
+echo   set currentDate=%%%%c-%%%%a-%%%%b>> "%scriptPath%"
+echo )>> "%scriptPath%"
+echo.>> "%scriptPath%"
+echo echo 更新规则 '%%2' 到 '%%3'>> "%scriptPath%"
+echo exit /b>> "%scriptPath%"
+echo.>> "%scriptPath%"
+echo :update_rule_error>> "%scriptPath%"
+echo echo 错误: 请提供规则ID和新路径>> "%scriptPath%"
+echo echo 用法: manage-library.bat update [id] [路径]>> "%scriptPath%"
+echo exit /b 1>> "%scriptPath%"
+```
+
+**Linux/macOS**
+```bash
+# Linux/macOS
+#!/bin/bash
 # 创建规则库管理脚本
-$manageLibraryScript = @"
+cat > "$libraryPath/manage-library.sh" << 'EOF'
+#!/bin/bash
+
 # Cursor规则库管理脚本
 
-`$libraryDir = "`$HOME\cursor-rules-library"
-`$rulesIndex = "`$libraryDir\rules-index.json"
-`$libraryJson = "`$libraryDir\library.json"
+LIBRARY_DIR="$HOME/cursor-rules-library"
+RULES_INDEX="$LIBRARY_DIR/rules-index.json"
+LIBRARY_JSON="$LIBRARY_DIR/library.json"
 
-function Show-Help {
-    Write-Output "Cursor规则库管理工具"
-    Write-Output ""
-    Write-Output "用法:"
-    Write-Output "  .\manage-library.ps1 [命令] [参数]"
-    Write-Output ""
-    Write-Output "命令:"
-    Write-Output "  list                列出所有规则"
-    Write-Output "  add [模板] [路径]    添加新规则"
-    Write-Output "  find [关键词]       搜索规则"
-    Write-Output "  update [id] [路径]  更新规则"
-    Write-Output "  help               显示帮助信息"
+function show_help {
+    echo "Cursor规则库管理工具"
+    echo ""
+    echo "用法:"
+    echo "  ./manage-library.sh [命令] [参数]"
+    echo ""
+    echo "命令:"
+    echo "  list                列出所有规则"
+    echo "  add [模板] [路径]    添加新规则"
+    echo "  find [关键词]       搜索规则"
+    echo "  update [id] [路径]  更新规则"
+    echo "  help               显示帮助信息"
 }
 
-function List-Rules {
-    Write-Output "规则库中的规则:"
-    `$rules = Get-Content -Path `$rulesIndex | ConvertFrom-Json
-    foreach (`$rule in `$rules.rules) {
-        Write-Output "- `$(`$rule.id): `$(`$rule.name) [`$(`$rule.category)]"
-    }
+function list_rules {
+    echo "规则库中的规则:"
+    grep -E "id|name" "$RULES_INDEX" | grep -v "rules"
 }
 
-function Find-Rules {
-    param (
-        [string]`$keyword
-    )
+function find_rules {
+    if [ -z "$1" ]; then
+        echo "错误: 请提供搜索关键词"
+        return 1
+    fi
     
-    if (-not `$keyword) {
-        Write-Output "错误: 请提供搜索关键词"
-        return
-    }
-    
-    Write-Output "搜索关键词: `$keyword"
-    `$rules = Get-Content -Path `$rulesIndex | ConvertFrom-Json
-    foreach (`$rule in `$rules.rules) {
-        if (`$rule.name -like "*`$keyword*" -or 
-            `$rule.description -like "*`$keyword*" -or 
-            `$rule.tags -contains `$keyword) {
-            Write-Output "- `$(`$rule.id): `$(`$rule.name) [`$(`$rule.category)]"
-        }
-    }
+    echo "搜索关键词: $1"
+    grep -i "$1" "$RULES_INDEX"
 }
 
-function Add-Rule {
-    param (
-        [string]`$template,
-        [string]`$path
-    )
+function add_rule {
+    if [ -z "$1" ] || [ -z "$2" ]; then
+        echo "错误: 请提供模板和目标路径"
+        echo "用法: ./manage-library.sh add [模板] [路径]"
+        return 1
+    fi
     
-    if (-not `$template -or -not `$path) {
-        Write-Output "错误: 请提供模板和目标路径"
-        Write-Output "用法: .\manage-library.ps1 add [模板] [路径]"
-        return
-    }
+    TEMPLATE="$LIBRARY_DIR/templates/$1.mdc"
+    TARGET="$LIBRARY_DIR/$2"
     
-    `$templatePath = "`$libraryDir\templates\`$template.mdc"
-    `$targetPath = "`$libraryDir\`$path"
+    if [ ! -f "$TEMPLATE" ]; then
+        echo "错误: 模板 '$1' 不存在"
+        return 1
+    fi
     
-    if (-not (Test-Path -Path `$templatePath -PathType Leaf)) {
-        Write-Output "错误: 模板 '`$template' 不存在"
-        return
-    }
-    
-    `$targetDir = Split-Path -Path `$targetPath -Parent
-    if (-not (Test-Path -Path `$targetDir -PathType Container)) {
-        New-Item -Path `$targetDir -ItemType Directory -Force
-    }
-    
-    Copy-Item -Path `$templatePath -Destination `$targetPath
-    Write-Output "创建新规则: `$targetPath"
-    Write-Output "请编辑新创建的规则文件"
+    mkdir -p "$(dirname "$TARGET")"
+    cp "$TEMPLATE" "$TARGET"
+    echo "创建新规则: $TARGET"
+    echo "请编辑新创建的规则文件"
 }
 
-function Update-RuleItem {
-    param (
-        [string]`$id,
-        [string]`$newPath
-    )
-    
-    if (-not `$id -or -not `$newPath) {
-        Write-Output "错误: 请提供规则ID和新路径"
-        Write-Output "用法: .\manage-library.ps1 update [id] [路径]"
-        return
-    }
+function update_rule {
+    if [ -z "$1" ] || [ -z "$2" ]; then
+        echo "错误: 请提供规则ID和新路径"
+        echo "用法: ./manage-library.sh update [id] [路径]"
+        return 1
+    fi
     
     # 更新规则索引
-    `$rules = Get-Content -Path `$rulesIndex | ConvertFrom-Json
-    foreach (`$rule in `$rules.rules) {
-        if (`$rule.id -eq `$id) {
-            `$rule.updated = (Get-Date -Format "yyyy-MM-dd")
-            `$rule.path = `$newPath
-        }
-    }
+    currentDate=$(date +"%Y-%m-%d")
     
-    `$rules | ConvertTo-Json -Depth 10 | Set-Content -Path `$rulesIndex
-    Write-Output "更新规则 '`$id' 到 '`$newPath'"
+    echo "更新规则 '$1' 到 '$2'"
 }
 
 # 主函数
-`$command = `$args[0]
-switch (`$command) {
-    "list" {
-        List-Rules
-    }
-    "find" {
-        Find-Rules -keyword `$args[1]
-    }
-    "add" {
-        Add-Rule -template `$args[1] -path `$args[2]
-    }
-    "update" {
-        Update-RuleItem -id `$args[1] -newPath `$args[2]
-    }
-    default {
-        Show-Help
-    }
-}
-"@
-$manageLibraryScript | Set-Content -Path "$libraryPath\manage-library.ps1"
+case "$1" in
+    list)
+        list_rules
+        ;;
+    find)
+        find_rules "$2"
+        ;;
+    add)
+        add_rule "$2" "$3"
+        ;;
+    update)
+        update_rule "$2" "$3"
+        ;;
+    help|*)
+        show_help
+        ;;
+esac
+EOF
+
+chmod +x "$libraryPath/manage-library.sh"
 ```
 
 ### 链接到项目
@@ -618,22 +860,31 @@ mkdir -p "$PROJECT_DIR/.cursor/rules"
 ln -sf ~/cursor-rules-library/categories/code-quality/js-best-practices.mdc "$PROJECT_DIR/.cursor/rules/js-best-practices.mdc"
 ```
 
-在Windows PowerShell中，可以使用以下命令创建符号链接（需要管理员权限）：
+在Terminal中，可以使用以下命令创建符号链接（需要管理员权限）：
 
-```powershell
-# 链接规则库到当前项目
-$projectDir = Get-Location
-New-Item -Path "$projectDir\.cursor\rules" -ItemType Directory -Force
-New-Item -ItemType SymbolicLink -Path "$projectDir\.cursor\rules\js-best-practices.mdc" -Target "$HOME\cursor-rules-library\categories\code-quality\js-best-practices.mdc"
+**CMD**
+```CMD
+# Windows CMD 
+@echo off
+rem 链接规则库到当前项目
+set projectDir=%CD%
+if not exist "%projectDir%\.cursor\rules" mkdir "%projectDir%\.cursor\rules"
+
+rem CMD中创建符号链接（需要管理员权限）
+mklink "%projectDir%\.cursor\rules\js-best-practices.mdc" "%USERPROFILE%\cursor-rules-library\categories\code-quality\js-best-practices.mdc"
+
+rem 如果没有管理员权限，使用复制替代
+rem copy "%USERPROFILE%\cursor-rules-library\categories\code-quality\js-best-practices.mdc" "%projectDir%\.cursor\rules\js-best-practices.mdc"
 ```
 
-如果没有管理员权限，可以使用复制替代：
-
-```powershell
-# 复制规则到当前项目
-$projectDir = Get-Location
-New-Item -Path "$projectDir\.cursor\rules" -ItemType Directory -Force
-Copy-Item -Path "$HOME\cursor-rules-library\categories\code-quality\js-best-practices.mdc" -Destination "$projectDir\.cursor\rules\js-best-practices.mdc"
+**Linux/macOS**
+```bash
+# Linux/macOS
+#!/bin/bash
+# 链接规则库到当前项目
+PROJECT_DIR=$(pwd)
+mkdir -p "$PROJECT_DIR/.cursor/rules"
+ln -sf ~/cursor-rules-library/categories/code-quality/js-best-practices.mdc "$PROJECT_DIR/.cursor/rules/js-best-practices.mdc"
 ```
 
 ## 使用个人规则库

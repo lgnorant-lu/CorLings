@@ -104,60 +104,46 @@ metadata:
 </rule>
 ```
 
-在Windows PowerShell环境中，调整为：
+在Windows环境中，调整为：
 
-```powershell
-Write-Output "开始执行部署前检查..."
+```CMD
+# Windows CMD
+@echo off
+echo 开始执行部署前检查...
+
+rem 检查构建是否成功
+echo 检查构建状态...
+npm run build
+if %errorlevel% neq 0 (
+    echo ERROR: 构建失败，请修复错误后再尝试部署
+    exit /b 1
+)
+
+rem 检查测试是否通过
+echo 运行测试...
+npm test
+if %errorlevel% neq 0 (
+    echo WARNING: 测试未全部通过，请检查失败的测试
+)
+
+# Linux/macOS
+#!/bin/bash
+echo "开始执行部署前检查..."
 
 # 检查构建是否成功
-Write-Output "检查构建状态..."
+echo "检查构建状态..."
 npm run build
-if ($LASTEXITCODE -ne 0) {
-    Write-Output "ERROR: 构建失败，请修复错误后再尝试部署"
+if [ $? -ne 0 ]; then
+    echo "ERROR: 构建失败，请修复错误后再尝试部署"
     exit 1
-}
+fi
 
 # 检查测试是否通过
-Write-Output "运行测试..."
+echo "运行测试..."
 npm test
-if ($LASTEXITCODE -ne 0) {
-    Write-Output "WARNING: 测试未全部通过，请检查失败的测试"
-}
-
-# 检查依赖是否有安全漏洞
-Write-Output "检查依赖安全漏洞..."
-npm audit
-
-# 检查环境配置文件
-Write-Output "检查环境配置..."
-$envFiles = @(".env.production", ".env.staging")
-
-foreach ($envFile in $envFiles) {
-    if (-not (Test-Path -Path $envFile -PathType Leaf)) {
-        Write-Output "WARNING: 缺少环境配置文件 $envFile"
-    } else {
-        # 检查关键配置项是否存在
-        $content = Get-Content -Path $envFile
-        $keys = @("API_URL", "DATABASE_URL", "AUTH_SECRET")
-        
-        foreach ($key in $keys) {
-            $keyPresent = $content | Where-Object { $_ -match "^$key=" }
-            if (-not $keyPresent) {
-                Write-Output "WARNING: $envFile 中缺少关键配置项 $key"
-            }
-        }
-    }
-}
-
-# 检查静态资源是否已优化
-Write-Output "检查静态资源..."
-$largeImages = Get-ChildItem -Path "public\images" -Recurse -Include *.png,*.jpg | Where-Object { $_.Length -gt 300KB }
-if ($largeImages.Count -gt 0) {
-    Write-Output "WARNING: 发现 $($largeImages.Count) 个大于300KB的图像文件，建议进行优化"
-    $largeImages | Format-Table Name, @{Name="Size"; Expression={"{0:N2} MB" -f ($_.Length / 1MB)}}
-}
-
-Write-Output "部署前检查完成"
+if [ $? -ne 0 ]; then
+    echo "WARNING: 测试未全部通过，请检查失败的测试"
+fi
 ```
 
 #### 5. 维护阶段集成
@@ -296,80 +282,42 @@ metadata:
 </rule>
 ```
 
-在Windows PowerShell环境中，调整为：
+在Windows环境中，调整为：
 
-```powershell
-Write-Output "正在分析技术债务..."
+```CMD
+# Windows CMD
+@echo off
+echo 正在分析技术债务...
+
+rem 创建技术债务目录
+set debtDir=.techdebt
+if not exist %debtDir% mkdir %debtDir%
+
+rem 查找所有技术债务标记
+echo 查找代码中的技术债务标记...
+
+rem 搜索各类技术债务标记
+findstr /S /M /C:"// TODO:" *.js *.ts *.jsx *.tsx > %debtDir%\todos.txt
+findstr /S /M /C:"// FIXME:" *.js *.ts *.jsx *.tsx > %debtDir%\fixmes.txt
+findstr /S /M /C:"// HACK:" *.js *.ts *.jsx *.tsx > %debtDir%\hacks.txt
+findstr /S /M /C:"// DEBT:" *.js *.ts *.jsx *.tsx > %debtDir%\debts.txt
+
+# Linux/macOS
+#!/bin/bash
+echo "正在分析技术债务..."
 
 # 创建技术债务目录
-$debtDir = ".techdebt"
-if (-not (Test-Path -Path $debtDir -PathType Container)) {
-    New-Item -Path $debtDir -ItemType Directory -Force
-}
+debtDir=".techdebt"
+mkdir -p $debtDir
 
 # 查找所有技术债务标记
-Write-Output "查找代码中的技术债务标记..."
+echo "查找代码中的技术债务标记..."
 
 # 搜索各类技术债务标记
-$todoItems = Get-ChildItem -Path . -Recurse -Include *.js,*.ts,*.jsx,*.tsx | Select-String -Pattern "// TODO:" | Out-File "$debtDir\todos.txt"
-$fixmeItems = Get-ChildItem -Path . -Recurse -Include *.js,*.ts,*.jsx,*.tsx | Select-String -Pattern "// FIXME:" | Out-File "$debtDir\fixmes.txt"
-$hackItems = Get-ChildItem -Path . -Recurse -Include *.js,*.ts,*.jsx,*.tsx | Select-String -Pattern "// HACK:" | Out-File "$debtDir\hacks.txt"
-$debtItems = Get-ChildItem -Path . -Recurse -Include *.js,*.ts,*.jsx,*.tsx | Select-String -Pattern "// DEBT:" | Out-File "$debtDir\debts.txt"
-
-# 统计各类技术债务数量
-$todoCount = (Get-Content "$debtDir\todos.txt" -ErrorAction SilentlyContinue).Count
-$fixmeCount = (Get-Content "$debtDir\fixmes.txt" -ErrorAction SilentlyContinue).Count
-$hackCount = (Get-Content "$debtDir\hacks.txt" -ErrorAction SilentlyContinue).Count
-$debtCount = (Get-Content "$debtDir\debts.txt" -ErrorAction SilentlyContinue).Count
-
-$totalCount = $todoCount + $fixmeCount + $hackCount + $debtCount
-
-# 生成技术债务报告
-$currentDate = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-
-@"
-# 技术债务报告
-
-*生成于 $currentDate*
-
-## 摘要
-
-| 类型 | 数量 |
-|------|------|
-| TODO | $todoCount |
-| FIXME | $fixmeCount |
-| HACK | $hackCount |
-| DEBT | $debtCount |
-| **总计** | **$totalCount** |
-
-## 详细列表
-
-### TODO 项
-
-```
-$(Get-Content "$debtDir\todos.txt" -Raw)
-```
-
-### FIXME 项
-
-```
-$(Get-Content "$debtDir\fixmes.txt" -Raw)
-```
-
-### HACK 项
-
-```
-$(Get-Content "$debtDir\hacks.txt" -Raw)
-```
-
-### DEBT 项
-
-```
-$(Get-Content "$debtDir\debts.txt" -Raw)
-```
-"@ | Set-Content -Path "$debtDir\report.md"
-
-Write-Output "技术债务分析完成，共发现 $totalCount 项债务"
+grep -r "// TODO:" --include="*.js" --include="*.ts" --include="*.jsx" --include="*.tsx" . > $debtDir/todos.txt
+grep -r "// FIXME:" --include="*.js" --include="*.ts" --include="*.jsx" --include="*.tsx" . > $debtDir/fixmes.txt
+grep -r "// HACK:" --include="*.js" --include="*.ts" --include="*.jsx" --include="*.tsx" . > $debtDir/hacks.txt
+grep -r "// DEBT:" --include="*.js" --include="*.ts" --include="*.jsx" --include="*.tsx" . > $debtDir/debts.txt
 ```
 
 ## 自动化工作流创建
@@ -580,7 +528,7 @@ actions:
             import axios from 'axios';
             import { {{camelCase(captures.feature_name)}} } from './index';
             
-            // Mock axios
+            # Mock axios
             jest.mock('axios');
             const mockedAxios = axios as jest.Mocked<typeof axios>;
             
@@ -590,13 +538,13 @@ actions:
               });
               
               test('calls the correct endpoint with params', async () => {
-                // 设置模拟响应
+                # 设置模拟响应
                 mockedAxios.post.mockResolvedValueOnce({ data: {} });
                 
-                // 调用API
+                # 调用API
                 await {{camelCase(captures.feature_name)}}({});
                 
-                // 验证调用
+                # 验证调用
                 expect(mockedAxios.post).toHaveBeenCalledWith(
                   expect.stringContaining('/api/{{kebabCase(captures.feature_name)}}'),
                   expect.any(Object)
@@ -780,69 +728,41 @@ metadata:
 </rule>
 ```
 
-在Windows环境中，需要对上述Shell命令部分进行调整，例如使用PowerShell语法创建文件和目录。关键的调整包括：
+以下是针对特性分支创建部分的调整示例：
 
-- 使用 `New-Item` 创建目录而非 `mkdir -p`
-- 使用 `Set-Content` 或 `Out-File` 代替 `cat >`
-- 调整Git命令的输出处理方式
+```CMD
+# Windows CMD
+@echo off
+echo 创建特性分支...
 
-以下是针对特性分支创建部分的PowerShell调整示例：
+rem 确保我们在最新的主分支上
+git checkout main
+git pull
 
-```powershell
-Write-Output "创建特性分支..."
+rem 创建特性分支
+set featureBranch=feature/%featureName%
+git checkout -b %featureBranch%
+
+rem 创建特性规划文档
+set featuresDir=docs\features
+if not exist %featuresDir% mkdir %featuresDir%
+
+rem 生成特性规划文档
+
+# Linux/macOS
+#!/bin/bash
+echo "创建特性分支..."
 
 # 确保我们在最新的主分支上
 git checkout main
 git pull
 
 # 创建特性分支
-$featureBranch = "feature/$featureName"
+featureBranch="feature/$featureName"
 git checkout -b $featureBranch
 
 # 创建特性规划文档
-$featuresDir = "docs\features"
-if (-not (Test-Path -Path $featuresDir -PathType Container)) {
-    New-Item -Path $featuresDir -ItemType Directory -Force
-}
+featuresDir="docs/features"
+mkdir -p $featuresDir
 
 # 生成特性规划文档
-$currentDate = Get-Date -Format "yyyy-MM-dd"
-
-@"
-# $featureName
-
-## 概述
-
-$featureDescription
-
-## 详细信息
-
-- **类型**: $featureType
-- **优先级**: $priority
-- **创建日期**: $currentDate
-- **状态**: 规划中
-
-## 功能要求
-
-- [ ] 要求1
-- [ ] 要求2
-- [ ] 要求3
-
-## 技术设计
-
-<!-- 在此描述技术设计和架构决策 -->
-
-## 测试计划
-
-<!-- 在此描述测试计划和验收标准 -->
-
-## 相关资源
-
-<!-- 在此添加相关资源链接 -->
-"@ | Set-Content -Path "$featuresDir\$featureName.md"
-
-# 提交特性规划文档
-git add "docs\features\$featureName.md"
-git commit -m "docs: 添加$featureName特性规划文档"
-
-Write-Output "特性规划文档已创建并提交"

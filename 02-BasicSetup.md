@@ -50,9 +50,9 @@ PROJECT_ROOT/
 
 ### 2. 在 Windows 上创建目录结构
 
-在 Windows 上，您可以使用命令提示符或 PowerShell 创建这些目录：
+在 Windows | CMD 上:
 
-```powershell
+```Terminal
 # 进入项目根目录
 cd 您的项目路径
 
@@ -141,7 +141,7 @@ metadata:
 
 在 `.cursor/rules/meta/` 目录中创建 `rules-location.mdc` 文件：
 
-```powershell
+```Terminal
 # 创建目录（如果尚未创建）
 mkdir -p .cursor\rules\meta
 

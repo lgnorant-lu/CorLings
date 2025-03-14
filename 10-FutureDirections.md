@@ -53,20 +53,49 @@ metadata:
 随着大型语言模型能力的提升，未来将出现更智能的规则生成方式：
 
 ```bash
-# Windows PowerShell中使用自然语言生成规则的示例
-$naturalLanguageDescription = "创建一个规则，检测循环中可能的数组越界问题，并建议添加边界检查"
+# Linux/macOS 使用自然语言生成规则的示例
+natural_language_description="创建一个规则，检测循环中可能的数组越界问题，并建议添加边界检查"
 
 # 调用规则生成API
-$generatedRule = Invoke-RestMethod -Uri "https://api.cursor.sh/rule-generation" -Method POST -Body @{
-    description = $naturalLanguageDescription
-    targetLanguage = "javascript"
-    complexity = "medium"
-} -ContentType "application/json"
+generated_rule=$(curl -s -X POST "https://api.cursor.sh/rule-generation" \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"description\": \"$natural_language_description\",
+    \"targetLanguage\": \"javascript\",
+    \"complexity\": \"medium\"
+  }")
 
 # 保存生成的规则
-$generatedRule | Out-File -FilePath ".\array_boundary_check.mdc"
+echo "$generated_rule" > "./array_boundary_check.mdc"
 
-Write-Output "已生成规则并保存到 array_boundary_check.mdc"
+echo "已生成规则并保存到 array_boundary_check.mdc"
+```
+
+```cmd
+@echo off
+REM Windows CMD使用自然语言生成规则的示例
+set "natural_language_description=创建一个规则，检测循环中可能的数组越界问题，并建议添加边界检查"
+
+REM 调用规则生成API (使用临时文件存储请求内容)
+echo {^
+  "description": "%natural_language_description%",^
+  "targetLanguage": "javascript",^
+  "complexity": "medium"^
+} > request.json
+
+REM 使用curl发送请求并保存响应
+curl -s -X POST "https://api.cursor.sh/rule-generation" ^
+  -H "Content-Type: application/json" ^
+  -d @request.json > response.json
+
+REM 保存生成的规则
+type response.json > array_boundary_check.mdc
+
+REM 清理临时文件
+del request.json
+del response.json
+
+echo 已生成规则并保存到 array_boundary_check.mdc
 ```
 
 这种方式将极大降低创建规则的门槛，使非技术用户也能定制个性化的编程助手。

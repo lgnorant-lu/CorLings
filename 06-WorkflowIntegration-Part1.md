@@ -102,18 +102,36 @@ metadata:
 </rule>
 ```
 
-在Windows环境中，使用PowerShell调整上述命令：
+在Windows环境：
 
-```powershell
+```CMD
+# Windows CMD
+@echo off
+rem 创建用户故事文件
+if not exist ".project\stories" mkdir ".project\stories"
+
+set storyId=%date:~0,4%%date:~5,2%%date:~8,2%%time:~0,2%%time:~3,2%%time:~6,2%
+set storyId=%storyId: =0%
+set currentDate=%date% %time%
+
+echo # %storyTitle% > .project\stories\%storyId%.md
+echo. >> .project\stories\%storyId%.md
+echo - **ID**: %storyId% >> .project\stories\%storyId%.md
+echo - **创建时间**: %currentDate% >> .project\stories\%storyId%.md
+echo - **故事点数**: %storyPoints% >> .project\stories\%storyId%.md
+echo - **优先级**: %priority% >> .project\stories\%storyId%.md
+echo. >> .project\stories\%storyId%.md
+echo ## 描述 >> .project\stories\%storyId%.md
+
+# Linux/macOS
+#!/bin/bash
 # 创建用户故事文件
-if (-not (Test-Path -Path ".project\stories" -PathType Container)) {
-    New-Item -Path ".project\stories" -ItemType Directory -Force
-}
+mkdir -p .project/stories
 
-$storyId = Get-Date -Format "yyyyMMddHHmmss"
-$currentDate = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+storyId=$(date +%Y%m%d%H%M%S)
+currentDate=$(date "+%Y-%m-%d %H:%M:%S")
 
-@"
+cat > .project/stories/$storyId.md << EOF
 # $storyTitle
 
 - **ID**: $storyId
@@ -122,25 +140,7 @@ $currentDate = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 - **优先级**: $priority
 
 ## 描述
-
-<!-- 详细描述用户故事 -->
-
-## 验收标准
-
-- [ ] 标准1
-- [ ] 标准2
-- [ ] 标准3
-
-## 技术说明
-
-<!-- 添加技术实现相关说明 -->
-
-## 相关链接
-
-<!-- 添加相关资源链接 -->
-"@ | Set-Content -Path ".project\stories\$storyId.md"
-
-Write-Output "已创建用户故事: $storyId"
+EOF
 ```
 
 #### 2. 编码阶段集成
@@ -282,14 +282,22 @@ metadata:
 </rule>
 ```
 
-在Windows PowerShell中，使用以下方式调整：
+在Windows环境：
 
-```powershell
+```CMD
+# Windows CMD
+@echo off
+rem 创建组件文件
+set componentDir=src\components\%featureName%
+if not exist %componentDir% mkdir %componentDir%
+
+rem 创建各类文件...（其他文件创建步骤类似）
+
+# Linux/macOS
+#!/bin/bash
 # 创建组件文件
-$componentDir = "src\components\$featureName"
-if (-not (Test-Path -Path $componentDir -PathType Container)) {
-    New-Item -Path $componentDir -ItemType Directory -Force
-}
+componentDir="src/components/$featureName"
+mkdir -p $componentDir
 
 # 创建各类文件...（其他文件创建步骤类似）
 ```
@@ -389,28 +397,55 @@ metadata:
 </rule>
 ```
 
-在Windows PowerShell中，调整以下部分：
+在Terminal中，调整以下部分：
 
-```powershell
+```CMD
+# Windows CMD
+@echo off
+rem 运行测试并生成覆盖率报告
+npm test -- --coverage
+
+rem 分析覆盖率数据
+set coverageReport=coverage\lcov-report\index.html
+
+if exist %coverageReport% (
+    rem 从HTML报告中提取覆盖率数据
+    for /f "tokens=2 delims=<>" %%a in ('findstr /C:"Lines" %coverageReport%') do (
+        for /f "tokens=2 delims=()" %%b in ("%%a") do set linesCoverage=%%b
+    )
+    for /f "tokens=2 delims=<>" %%a in ('findstr /C:"Statements" %coverageReport%') do (
+        for /f "tokens=2 delims=()" %%b in ("%%a") do set statementsCoverage=%%b
+    )
+    for /f "tokens=2 delims=<>" %%a in ('findstr /C:"Functions" %coverageReport%') do (
+        for /f "tokens=2 delims=()" %%b in ("%%a") do set functionsCoverage=%%b
+    )
+    for /f "tokens=2 delims=<>" %%a in ('findstr /C:"Branches" %coverageReport%') do (
+        for /f "tokens=2 delims=()" %%b in ("%%a") do set branchesCoverage=%%b
+    )
+    
+    echo LINES_COVERAGE=%linesCoverage%
+    echo STATEMENTS_COVERAGE=%statementsCoverage%
+    echo FUNCTIONS_COVERAGE=%functionsCoverage%
+    echo BRANCHES_COVERAGE=%branchesCoverage%
+)
+
+# Linux/macOS
+#!/bin/bash
 # 运行测试并生成覆盖率报告
 npm test -- --coverage
 
 # 分析覆盖率数据
-$coverageReport = "coverage\lcov-report\index.html"
+coverageReport="coverage/lcov-report/index.html"
 
-if (Test-Path -Path $coverageReport -PathType Leaf) {
+if [ -f "$coverageReport" ]; then
     # 从HTML报告中提取覆盖率数据
-    $content = Get-Content -Path $coverageReport -Raw
-    $linesCoverage = if ($content -match "Lines.*?([0-9.]+)%") { $matches[1] } else { "0" }
-    $statementsCoverage = if ($content -match "Statements.*?([0-9.]+)%") { $matches[1] } else { "0" }
-    $functionsCoverage = if ($content -match "Functions.*?([0-9.]+)%") { $matches[1] } else { "0" }
-    $branchesCoverage = if ($content -match "Branches.*?([0-9.]+)%") { $matches[1] } else { "0" }
+    linesCoverage=$(grep -o 'Lines.*[0-9.]\+%' "$coverageReport" | grep -o '[0-9.]\+')
+    statementsCoverage=$(grep -o 'Statements.*[0-9.]\+%' "$coverageReport" | grep -o '[0-9.]\+')
+    functionsCoverage=$(grep -o 'Functions.*[0-9.]\+%' "$coverageReport" | grep -o '[0-9.]\+')
+    branchesCoverage=$(grep -o 'Branches.*[0-9.]\+%' "$coverageReport" | grep -o '[0-9.]\+')
     
-    Write-Output "LINES_COVERAGE=$linesCoverage"
-    Write-Output "STATEMENTS_COVERAGE=$statementsCoverage"
-    Write-Output "FUNCTIONS_COVERAGE=$functionsCoverage"
-    Write-Output "BRANCHES_COVERAGE=$branchesCoverage"
-} else {
-    Write-Output "ERROR: 找不到覆盖率报告"
-}
-``` 
+    echo "LINES_COVERAGE=$linesCoverage"
+    echo "STATEMENTS_COVERAGE=$statementsCoverage"
+    echo "FUNCTIONS_COVERAGE=$functionsCoverage"
+    echo "BRANCHES_COVERAGE=$branchesCoverage"
+fi 

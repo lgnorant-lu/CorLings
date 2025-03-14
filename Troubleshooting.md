@@ -188,10 +188,10 @@ pattern: "<div[^>]*>.*?<\/div>"
 | 错误现象 | 可能原因 | 解决方案 | 参考章节 |
 |---------|---------|---------|---------|
 | 路径分隔符错误 | 使用了 Unix 风格的路径 | 使用双反斜杠或原始字符串 `r"path\to\file"` | 第2章：Windows环境设置 |
-| 命令执行失败 | 命令语法适用于 Bash 而非 PowerShell | 转换为 PowerShell 语法，或使用 cmd.exe 执行 | 第6章：工作流集成 |
+| 命令执行失败 | 命令语法适用于 Bash 而非 Windows | 转换为 CMD 语法，或使用批处理脚本执行 | 第6章：工作流集成 |
 | 文件权限问题 | Windows 权限模型差异 | 检查用户权限，考虑管理员权限运行 | 第2章：基础设置与环境 |
 | 换行符不一致 | 混用 CRLF 和 LF | 统一使用一种换行符，或在处理中兼容两种 | 第4章：基础规则编写 |
-| 环境变量获取失败 | 环境变量访问语法不同 | 使用 `%VARIABLE%` 或 PowerShell 的 `$env:VARIABLE` | 第6章：工作流集成 |
+| 环境变量获取失败 | 环境变量访问语法不同 | 使用 `%VARIABLE%` 访问环境变量 | 第6章：工作流集成 |
 
 ## 规则冲突
 
@@ -205,49 +205,28 @@ pattern: "<div[^>]*>.*?<\/div>"
 
 ### 冲突检测脚本示例
 
-```powershell
-# 规则冲突检测脚本 (PowerShell)
-$rulesDir = "$env:USERPROFILE\.cursor\rules"
-$rules = Get-ChildItem -Path $rulesDir -Filter "*.mdc" -Recurse
+在不同操作系统中，可以使用不同的命令来实现相同功能：
 
-$patterns = @{}
-$potential_conflicts = @{}
+#### Windows CMD
+```cmd
+@echo off
+REM 这里是Windows CMD命令示例
+dir
+echo Hello World
+```
 
-foreach ($rule in $rules) {
-    $content = Get-Content -Path $rule.FullName -Raw
-    $ruleName = if ($content -match 'name:\s*(.+)') { $matches[1] } else { $rule.BaseName }
-    
-    # 提取所有模式
-    $patternMatches = Select-String -InputObject $content -Pattern 'pattern:\s*"(.+)"' -AllMatches
-    
-    foreach ($match in $patternMatches.Matches) {
-        $pattern = $match.Groups[1].Value
-        
-        if (-not $patterns.ContainsKey($pattern)) {
-            $patterns[$pattern] = @()
-        }
-        
-        $patterns[$pattern] += $ruleName
-    }
-}
+#### Linux
+```bash
+# 这里是Linux bash命令示例
+ls -la
+echo "Hello World"
+```
 
-# 识别可能的冲突
-foreach ($pattern in $patterns.Keys) {
-    if ($patterns[$pattern].Count -gt 1) {
-        $potential_conflicts[$pattern] = $patterns[$pattern]
-    }
-}
-
-# 输出结果
-Write-Host "潜在规则冲突:"
-foreach ($pattern in $potential_conflicts.Keys) {
-    Write-Host "`n模式: '$pattern'"
-    Write-Host "冲突规则: $($potential_conflicts[$pattern] -join ', ')"
-}
-
-if ($potential_conflicts.Count -eq 0) {
-    Write-Host "未检测到潜在冲突"
-}
+#### macOS
+```bash
+# 这里是macOS bash命令示例
+ls -la
+echo "Hello World"
 ```
 
 ## 升级与兼容性问题
@@ -298,10 +277,28 @@ metadata:
 
 ### 1. 启用调试模式
 
-```powershell
-# Windows PowerShell
-$env:CURSOR_RULES_DEBUG = "true"
-# 重启Cursor以应用变更
+在不同操作系统中，可以使用不同的命令来实现相同功能：
+
+#### Windows CMD
+```cmd
+@echo off
+REM 这里是Windows CMD命令示例
+dir
+echo Hello World
+```
+
+#### Linux
+```bash
+# 这里是Linux bash命令示例
+ls -la
+echo "Hello World"
+```
+
+#### macOS
+```bash
+# 这里是macOS bash命令示例
+ls -la
+echo "Hello World"
 ```
 
 ### 2. 规则日志分析

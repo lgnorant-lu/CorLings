@@ -133,17 +133,29 @@
 
 **PowerShell 测试脚本示例**：
 
-```powershell
-# 检查Markdown语法
-if (Get-Command markdownlint -ErrorAction SilentlyContinue) {
-    Write-Host "正在检查Markdown语法..."
-    markdownlint *.md
-} else {
-    Write-Host "未安装markdownlint，跳过Markdown语法检查"
-}
+在不同操作系统中，可以使用不同的命令来实现相同功能：
 
-# 检查规则示例语法
-$ruleExamples = Select-String -Path *.md -Pattern "```rule" -Context 0,50
+#### Windows CMD
+```cmd
+@echo off
+REM 这里是Windows CMD命令示例
+dir
+echo Hello World
+```
+
+#### Linux
+```bash
+# 这里是Linux bash命令示例
+ls -la
+echo "Hello World"
+```
+
+#### macOS
+```bash
+# 这里是macOS bash命令示例
+ls -la
+echo "Hello World"
+```rule" -Context 0,50
 foreach ($example in $ruleExamples) {
     $ruleContent = $example.Context.PostContext -join "`n"
     $ruleContent = $ruleContent.Substring(0, $ruleContent.IndexOf("```"))
@@ -155,7 +167,29 @@ foreach ($example in $ruleExamples) {
 # 检查链接有效性
 $mdFiles = Get-ChildItem -Filter "*.md"
 foreach ($file in $mdFiles) {
-    $content = Get-Content $file -Raw
+    在不同操作系统下，可以使用以下命令读取文件内容：
+
+#### Windows CMD
+```cmd
+@echo off
+REM 读取文件内容到变量
+for /f "delims=" %%i in (filename.txt) do set content=%%i
+echo %content%
+```
+
+#### Linux
+```bash
+# 读取文件内容到变量
+content=$(cat filename.txt)
+echo $content
+```
+
+#### macOS
+```bash
+# 读取文件内容到变量
+content=$(cat filename.txt)
+echo $content
+``` $file -Raw
     $links = [regex]::Matches($content, '\[.*?\]\((.*?)\)')
     
     foreach ($link in $links) {

@@ -83,10 +83,17 @@ metadata:
 3. 在该目录中创建文件 `js_syntax.mdc`
 4. 将上面的规则内容复制到文件中并保存
 
-> **注意**：在Windows环境中，你也可以使用PowerShell命令创建目录和文件：
-> ```powershell
-> New-Item -Path ".cursor\rules\code_standards" -ItemType Directory -Force
-> New-Item -Path ".cursor\rules\code_standards\js_syntax.mdc" -ItemType File -Force
+> ```CMD
+> # Windows CMD
+> mkdir .cursor\rules\code_standards
+> cd .cursor\rules\code_standards
+> type nul > js_syntax.mdc
+> ```
+> ```bash
+> # Linux/macOS
+> mkdir -p .cursor/rules/code_standards
+> cd .cursor/rules/code_standards
+> touch js_syntax.mdc
 > ```
 
 ### 简单规则解析
@@ -271,8 +278,8 @@ examples:
 ```
 - type: execute
   command: |
-    echo "DEBUG: 规则已触发"
-    echo "匹配内容: {{match}}"
+    echo DEBUG: 规则已触发
+    echo 匹配内容: {{match}}
 ```
 
 2. **临时文件**：将中间结果保存到临时文件中进行检查
@@ -280,7 +287,7 @@ examples:
 ```
 - type: execute
   command: |
-    echo "{{match}}" > .cursor/tmp/debug.txt
+    echo {{match}} > .cursor\tmp\debug.txt
 ```
 
 3. **增量开发**：从简单规则开始，逐步添加更复杂的功能
@@ -293,7 +300,11 @@ examples:
 ```
 - type: execute
   command: |
-    powershell -Command "Write-Host 'DEBUG: 规则已触发' -ForegroundColor Green"
+    # Linux/macOS
+    bash -c "echo '执行命令...'"
+    
+    # Windows CMD
+    cmd /c "echo 执行命令..."
 ```
 
 ## 实践示例：创建Git提交辅助规则
@@ -341,6 +352,7 @@ actions:
 
   - type: execute
     command: |
+      # Linux/macOS版本
       # 构建提交消息
       COMMIT_MSG="${type}"
       if [ -n "${scope}" ]; then
@@ -389,34 +401,39 @@ metadata:
 
 1. **路径分隔符**：Windows使用反斜杠（`\`）作为路径分隔符，但在规则文件中建议统一使用正斜杠（`/`）
 
-2. **Shell命令**：上述规则中的shell命令在Windows中可能无法直接运行，需要替换为PowerShell命令：
+2. **Shell命令**：上述规则中的shell命令在Windows中需要替换为以下版本：
+
+```
+# Windows CMD版本
+@echo off
+REM 构建提交消息
+set COMMIT_MSG=%type%
+if not "%scope%"=="" set COMMIT_MSG=%COMMIT_MSG%(%scope%)
+set COMMIT_MSG=%COMMIT_MSG%: %description%
+
+if not "%body%"=="" (
+  set "COMMIT_MSG=%COMMIT_MSG%
+
+%body%"
+)
+
+REM 执行提交
+git add .
+git commit -m "%COMMIT_MSG%"
+
+echo 已创建提交: %COMMIT_MSG%
+```
+
+3. **命令调用**：在不同操作系统中，命令执行方式有所不同：
 
 ```
 - type: execute
   command: |
-    # Windows PowerShell版本
-    $commitMsg = "$type"
-    if (-not [string]::IsNullOrEmpty($scope)) {
-      $commitMsg = "${commitMsg}(${scope})"
-    }
-    $commitMsg = "${commitMsg}: ${description}"
+    # Linux/macOS
+    bash -c "echo '执行命令...'"
     
-    if (-not [string]::IsNullOrEmpty($body)) {
-      $commitMsg = "${commitMsg}`n`n${body}"
-    }
-    
-    git add .
-    git commit -m "$commitMsg"
-    
-    Write-Host "已创建提交: $commitMsg"
-```
-
-3. **命令调用**：在Windows中，可能需要显式指定使用PowerShell执行命令：
-
-```
-- type: execute
-  command: |
-    powershell -Command "..."
+    # Windows CMD
+    cmd /c "echo 执行命令..."
 ```
 
 ## 规则优化技巧

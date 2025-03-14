@@ -119,66 +119,50 @@ metadata:
 </rule>
 ```
 
-在Windows PowerShell环境中，可以调整为：
+在Terminal环境中，可以调整为：
 
-```powershell
-Write-Output "执行提交前检查..."
+```CMD
+# Windows CMD
+@echo off
+echo 执行提交前检查...
+
+rem 检查是否有未暂存文件
+git diff --name-only > unstaged.txt
+set /p unstaged=<unstaged.txt
+if defined unstaged (
+    echo WARNING: 检测到未暂存的更改:
+    type unstaged.txt
+    
+    set /p addUnstaged=是否要将这些更改添加到此次提交? (y/n)
+    if "%addUnstaged%"=="y" (
+        git add .
+        echo 已添加所有文件到暂存区
+    )
+)
+del unstaged.txt
+
+rem 运行Lint检查
+echo 运行Lint检查...
+
+# Linux/macOS
+#!/bin/bash
+echo "执行提交前检查..."
 
 # 检查是否有未暂存文件
-$unstaged = git diff --name-only
-if ($unstaged) {
-    Write-Output "WARNING: 检测到未暂存的更改:"
-    Write-Output $unstaged
+unstaged=$(git diff --name-only)
+if [ -n "$unstaged" ]; then
+    echo "WARNING: 检测到未暂存的更改:"
+    echo "$unstaged"
     
-    $addUnstaged = Read-Host "是否要将这些更改添加到此次提交? (y/n)"
-    if ($addUnstaged -eq "y") {
+    read -p "是否要将这些更改添加到此次提交? (y/n) " addUnstaged
+    if [ "$addUnstaged" = "y" ]; then
         git add .
-        Write-Output "已添加所有文件到暂存区"
-    }
-}
+        echo "已添加所有文件到暂存区"
+    fi
+fi
 
 # 运行Lint检查
-Write-Output "运行Lint检查..."
-if (Get-Command eslint -ErrorAction SilentlyContinue) {
-    $eslintResult = $null
-    try {
-        $eslintResult = eslint --ext .js,.jsx,.ts,.tsx src/
-    }
-    catch {
-        Write-Output "WARNING: ESLint检查发现问题"
-        $continueCommit = Read-Host "是否继续提交? (y/n)"
-        if ($continueCommit -ne "y") {
-            Write-Output "提交已取消。请修复Lint问题后再提交。"
-            exit 1
-        }
-    }
-}
-
-# 运行测试
-Write-Output "运行单元测试..."
-try {
-    npm test -- --watchAll=false
-}
-catch {
-    Write-Output "WARNING: 测试失败"
-    $continueCommit = Read-Host "是否继续提交? (y/n)"
-    if ($continueCommit -ne "y") {
-        Write-Output "提交已取消。请修复测试问题后再提交。"
-        exit 1
-    }
-}
-
-# 构建提交消息
-$commitMsg = if ($commitScope) {
-    "$commitType($commitScope): $commitDescription"
-} else {
-    "$commitType: $commitDescription"
-}
-
-# 执行提交
-git commit -m $commitMsg
-
-Write-Output "提交成功: $commitMsg"
+echo "运行Lint检查..."
 ```
 
 #### 2. 分支管理与合并
@@ -397,43 +381,54 @@ metadata:
 </rule>
 ```
 
-在Windows PowerShell环境中，分支创建部分可以调整为：
+在Terminal环境中，分支创建部分可以调整为：
 
-```powershell
+```CMD
+# Windows CMD
+@echo off
+rem 设置源分支（默认为main）
+if not "%captures.source_branch%"=="" (
+    set sourceBranch=%captures.source_branch%
+) else (
+    set sourceBranch=main
+)
+
+echo 从 %sourceBranch% 创建新分支 %captures.branch_name%...
+
+rem 检查当前工作区状态
+git status --porcelain > status.txt
+set /p uncommittedChanges=<status.txt
+if defined uncommittedChanges (
+    echo WARNING: 当前工作区有未提交的更改。
+    set /p continue=是否继续? (y/n)
+    if not "%continue%"=="y" (
+        echo 操作已取消。
+        exit /b 1
+    )
+)
+del status.txt
+
+rem 检查源分支是否存在
+
+# Linux/macOS
+#!/bin/bash
 # 设置源分支（默认为main）
-$sourceBranch = if ($captures.source_branch) { $captures.source_branch } else { "main" }
+sourceBranch=${captures.source_branch:-main}
 
-Write-Output "从 $sourceBranch 创建新分支 $($captures.branch_name)..."
+echo "从 $sourceBranch 创建新分支 ${captures.branch_name}..."
 
 # 检查当前工作区状态
-$uncommittedChanges = git status --porcelain
-if ($uncommittedChanges) {
-    Write-Output "WARNING: 当前工作区有未提交的更改。"
-    $continue = Read-Host "是否继续? (y/n)"
-    if ($continue -ne "y") {
-        Write-Output "操作已取消。"
+uncommittedChanges=$(git status --porcelain)
+if [ -n "$uncommittedChanges" ]; then
+    echo "WARNING: 当前工作区有未提交的更改。"
+    read -p "是否继续? (y/n) " continue
+    if [ "$continue" != "y" ]; then
+        echo "操作已取消。"
         exit 1
-    }
-}
+    fi
+fi
 
 # 检查源分支是否存在
-git fetch
-$localBranchExists = git show-ref --verify --quiet refs/heads/$sourceBranch 2>$null
-$remoteBranchExists = git show-ref --verify --quiet refs/remotes/origin/$sourceBranch 2>$null
-
-if (-not $localBranchExists -and -not $remoteBranchExists) {
-    Write-Output "ERROR: 源分支 '$sourceBranch' 不存在。"
-    exit 1
-}
-
-# 确保源分支是最新的
-git checkout $sourceBranch
-git pull
-
-# 创建新分支
-git checkout -b $($captures.branch_name)
-
-Write-Output "分支 $($captures.branch_name) 已创建"
 ```
 
 ### 与代码检查工具集成
@@ -584,72 +579,60 @@ metadata:
 </rule>
 ```
 
-在Windows PowerShell环境中，可以调整为：
+在Terminal环境中，可以调整为：
 
-```powershell
-Write-Output "运行ESLint检查..."
+```CMD
+# Windows CMD
+@echo off
+echo 运行ESLint检查...
+
+rem 检查ESLint是否已安装
+where eslint > nul 2>&1
+if %errorlevel% neq 0 (
+    echo ESLint未安装，正在安装...
+    npm install eslint --save-dev
+)
+
+rem 检查是否有ESLint配置文件
+if not exist ".eslintrc.js" (
+    if not exist ".eslintrc.json" (
+        if not exist ".eslintrc.yml" (
+            echo 未检测到ESLint配置文件，创建默认配置...
+            
+            echo module.exports = { > .eslintrc.js
+            echo   env: { >> .eslintrc.js
+            echo     browser: true, >> .eslintrc.js
+            echo     es2021: true, >> .eslintrc.js
+            echo     node: true >> .eslintrc.js
+            echo   }, >> .eslintrc.js
+            echo   extends: 'eslint:recommended', >> .eslintrc.js
+            echo   parserOptions: { >> .eslintrc.js
+            echo     ecmaVersion: 12, >> .eslintrc.js
+            echo     sourceType: 'module' >> .eslintrc.js
+            echo   }, >> .eslintrc.js
+            echo   rules: { >> .eslintrc.js
+            echo   } >> .eslintrc.js
+            echo }; >> .eslintrc.js
+        )
+    )
+)
+
+# Linux/macOS
+#!/bin/bash
+echo "运行ESLint检查..."
 
 # 检查ESLint是否已安装
-if (-not (Get-Command eslint -ErrorAction SilentlyContinue)) {
-    Write-Output "ESLint未安装，正在安装..."
+if ! command -v eslint &> /dev/null; then
+    echo "ESLint未安装，正在安装..."
     npm install eslint --save-dev
-}
+fi
 
 # 检查是否有ESLint配置文件
-if (-not (Test-Path -Path ".eslintrc.js" -PathType Leaf) -and 
-    -not (Test-Path -Path ".eslintrc.json" -PathType Leaf) -and 
-    -not (Test-Path -Path ".eslintrc.yml" -PathType Leaf)) {
+if [ ! -f ".eslintrc.js" ] && [ ! -f ".eslintrc.json" ] && [ ! -f ".eslintrc.yml" ]; then
+    echo "未检测到ESLint配置文件，创建默认配置..."
     
-    Write-Output "未检测到ESLint配置文件，创建默认配置..."
-    
-    @"
+    cat > .eslintrc.js << 'EOF'
 module.exports = {
-  env: {
-    browser: true,
-    es2021: true,
-    node: true,
-  },
-  extends: [
-    'eslint:recommended',
-    'plugin:react/recommended',
-    'plugin:@typescript-eslint/recommended',
-  ],
-  parser: '@typescript-eslint/parser',
-  parserOptions: {
-    ecmaFeatures: {
-      jsx: true,
-    },
-    ecmaVersion: 12,
-    sourceType: 'module',
-  },
-  plugins: [
-    'react',
-    '@typescript-eslint',
-  ],
-  rules: {
-    // 自定义规则
-  },
-};
-"@ | Set-Content -Path ".eslintrc.js"
-    
-    # 安装必要的依赖
-    npm install --save-dev eslint-plugin-react @typescript-eslint/eslint-plugin @typescript-eslint/parser
-    
-    Write-Output "已创建ESLint配置文件"
-}
-
-# 确定检查范围
-$lintTarget = if ($filePath) { $filePath } else { "src\" }
-
-# 运行ESLint
-eslint $lintTarget --fix
-
-# 获取ESLint结果
-$lintOutput = eslint $lintTarget -f json | ConvertFrom-Json
-$errorCount = ($lintOutput | ForEach-Object { $_.errorCount } | Measure-Object -Sum).Sum
-$warningCount = ($lintOutput | ForEach-Object { $_.warningCount } | Measure-Object -Sum).Sum
-
-Write-Output "ESLint检查完成: $errorCount 个错误, $warningCount 个警告"
 ```
 
 ### 与开发环境集成
@@ -817,17 +800,27 @@ metadata:
 </rule>
 ```
 
-在Windows PowerShell环境中，脚本查看部分可以调整为：
+在Terminal环境中，脚本查看部分可以调整为：
 
-```powershell
-Write-Output "查看可用脚本..."
+```CMD
+# Windows CMD
+@echo off
+echo 查看可用脚本...
+
+rem 提取package.json中的脚本
+npm run
+
+# Linux/macOS
+#!/bin/bash
+echo "查看可用脚本..."
 
 # 提取package.json中的脚本
-$packageJson = Get-Content -Path "package.json" -Raw | ConvertFrom-Json
-$scripts = $packageJson.scripts | ConvertTo-Json -Depth 1
-
-Write-Output "项目中的可用脚本:"
-Write-Output $scripts
+if [ -f "package.json" ]; then
+    echo "项目中的可用脚本:"
+    jq '.scripts' package.json
+else
+    echo "找不到package.json文件"
+fi
 ```
 
 ## 组合规则创建完整工作流

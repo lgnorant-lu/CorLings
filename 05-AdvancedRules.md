@@ -748,19 +748,48 @@ metadata:
 </rule>
 ```
 
-在Windows环境中，可以使用PowerShell改写上述bash命令：
+在不同操作系统中，可以使用以下命令检查项目配置：
 
-```powershell
+```bash
+# Linux/macOS
 # 检查项目配置
-if (Test-Path "package.json") {
-    $packageJson = Get-Content "package.json" -Raw | ConvertFrom-Json
-    $reactVersion = $packageJson.dependencies.react -replace '^[\^~]'
-    Write-Output "REACT_VERSION=$reactVersion"
+if [ -f "package.json" ]; then
+    REACT_VERSION=$(grep -o '"react": "[^"]*"' package.json | grep -o '[0-9][0-9.]*')
+    echo "REACT_VERSION=$REACT_VERSION"
     
     # 检查是否有React测试库
-    $hasTestingLibrary = if ($packageJson.dependencies.'@testing-library/react' -or $packageJson.devDependencies.'@testing-library/react') { 1 } else { 0 }
-    Write-Output "HAS_TESTING_LIBRARY=$hasTestingLibrary"
-}
+    if grep -q '"@testing-library/react"' package.json; then
+        echo "HAS_TESTING_LIBRARY=1"
+    else
+        echo "HAS_TESTING_LIBRARY=0"
+    fi
+fi
+```
+
+```cmd
+@echo off
+REM Windows CMD
+REM 检查项目配置
+if exist "package.json" (
+    findstr /C:"\"react\": \"" package.json > temp.txt
+    for /F "tokens=2 delims=:^ " %%a in (temp.txt) do (
+        set REACT_VERSION=%%a
+        set REACT_VERSION=!REACT_VERSION:"=!
+        set REACT_VERSION=!REACT_VERSION:,=!
+        set REACT_VERSION=!REACT_VERSION:^=!
+        set REACT_VERSION=!REACT_VERSION:~=!
+        echo REACT_VERSION=!REACT_VERSION!
+    )
+    
+    findstr /C:"\"@testing-library/react\"" package.json > nul
+    if not errorlevel 1 (
+        echo HAS_TESTING_LIBRARY=1
+    ) else (
+        echo HAS_TESTING_LIBRARY=0
+    )
+    
+    del temp.txt
+)
 ```
 
 ### 动态规则生成
@@ -1284,22 +1313,40 @@ metadata:
 
 在Windows环境中，如果要运行上述JavaScript代码，可以使用Node.js：
 
-```powershell
+```bash
+# Linux/macOS
 # 安装必要的依赖
 npm install @babel/parser @babel/traverse
 
 # 编写分析脚本
-$analyzeScript = @"
+cat > analyze-temp.js << 'EOF'
 const { parse } = require('@babel/parser');
 const { default: traverse } = require('@babel/traverse');
 const fs = require('fs');
 
-const fileContent = fs.readFileSync('$filePath', 'utf-8');
-// 此处放置上述分析代码
-"@
+const fileContent = fs.readFileSync('${filePath}', 'utf-8');
+// 此处放置分析代码
+EOF
 
-# 保存并执行脚本
-$analyzeScript | Out-File -FilePath "analyze-temp.js" -Encoding utf8
+# 执行脚本
+node analyze-temp.js
+```
+
+```cmd
+@echo off
+REM Windows CMD
+REM 安装必要的依赖
+npm install @babel/parser @babel/traverse
+
+REM 创建分析脚本
+echo const { parse } = require('@babel/parser'); > analyze-temp.js
+echo const { default: traverse } = require('@babel/traverse'); >> analyze-temp.js
+echo const fs = require('fs'); >> analyze-temp.js
+echo. >> analyze-temp.js
+echo const fileContent = fs.readFileSync('%filePath%', 'utf-8'); >> analyze-temp.js
+echo // 此处放置分析代码 >> analyze-temp.js
+
+REM 执行脚本
 node analyze-temp.js
 ```
 
@@ -1322,10 +1369,18 @@ filters:
   
   - type: history
     command: |
+      # Linux/macOS
       # 检查Git历史中这个函数是否有多次修复记录
       git log -p -- "{{file_path}}" | 
       grep -A 3 -B 3 "function\\s+{{captures.function_name}}\\s*(" | 
       grep -c "\\bfix\\b\\|\\bbug\\b\\|\\bissue\\b"
+      
+      # Windows CMD
+      # git log -p -- "{{file_path}}" | findstr /r /c:"function\s*{{captures.function_name}}\s*(" /c:"fix" /c:"bug" /c:"issue" > temp.txt
+      # for /f %%a in ('type temp.txt ^| find /c /v ""') do set COUNT=%%a
+      # echo %COUNT%
+      # del temp.txt
+      
     min_count: 3
 
 actions:
@@ -1568,22 +1623,31 @@ metadata:
 
 在Windows PowerShell中调整依赖分析代码：
 
-```powershell
+```CMD
+# Windows CMD
+@echo off
+rem 分析过时的依赖
+npm outdated --json > outdated.json 2>nul
+if %errorlevel% equ 0 (
+    for /f "tokens=1,2,3 delims=:" %%a in ('type outdated.json ^| findstr /C:"current" /C:"latest"') do (
+        set "dep=%%a"
+        set "current=%%b"
+        set "latest=%%c"
+        echo OUTDATED:!dep!:!current!:!latest!
+    )
+) else (
+    echo 无法分析过时的依赖
+)
+
+# Linux/macOS
+#!/bin/bash
 # 分析过时的依赖
-try {
-    $outdatedOutput = npm outdated --json 2>$null
-    if ($outdatedOutput) {
-        $outdatedDeps = $outdatedOutput | ConvertFrom-Json -AsHashtable
-        foreach ($dep in $outdatedDeps.GetEnumerator()) {
-            $name = $dep.Key
-            $current = $dep.Value.current
-            $latest = $dep.Value.latest
-            Write-Output "OUTDATED:$name:$current:$latest"
-        }
-    }
-} catch {
-    Write-Output "无法分析过时的依赖: $_"
-}
+outdated_output=$(npm outdated --json 2>/dev/null)
+if [ $? -eq 0 ] && [ -n "$outdated_output" ]; then
+    echo "$outdated_output" | jq -r 'to_entries | .[] | "OUTDATED:" + .key + ":" + .value.current + ":" + .value.latest'
+else
+    echo "无法分析过时的依赖"
+fi
 ```
 
 #### 3. AI辅助动作
@@ -1704,12 +1768,20 @@ metadata:
 
 在Windows PowerShell中调整安全扫描命令：
 
-```powershell
+```CMD
+# Windows CMD
+rem 使用npm audit检查依赖安全问题
+npm audit --json > security-audit.json
+
+rem 使用ESLint安全插件检查代码
+npx eslint --plugin security --rule "security/detect-possible-timing-attacks: error" "%filePath%" -f json > security-eslint.json
+
+# Linux/macOS
 # 使用npm audit检查依赖安全问题
-npm audit --json | Out-File -FilePath "security-audit.json" -Encoding utf8
+npm audit --json > security-audit.json
 
 # 使用ESLint安全插件检查代码
-npx eslint --plugin security --rule "security/detect-possible-timing-attacks: error" "$filePath" -f json | Out-File -FilePath "security-eslint.json" -Encoding utf8
+npx eslint --plugin security --rule "security/detect-possible-timing-attacks: error" "$filePath" -f json > security-eslint.json
 ```
 
 ### 组合高级过滤器和动作
@@ -1843,40 +1915,40 @@ metadata:
 
 在Windows PowerShell中调整上述脚本：
 
-```powershell
+```CMD
+# Windows CMD
+@echo off
+rem 创建文档目录（如果不存在）
+if not exist "docs" mkdir docs
+
+rem 生成项目总览文档
+echo # 项目文档 > docs\index.md
+echo. >> docs\index.md
+echo ## 项目概述 >> docs\index.md
+echo. >> docs\index.md
+echo 本文档自动生成于 %date% %time% >> docs\index.md
+echo. >> docs\index.md
+
+rem 从README提取信息（如果存在）
+
+# Linux/macOS
+#!/bin/bash
 # 创建文档目录（如果不存在）
-if (-not (Test-Path -Path "docs" -PathType Container)) {
-    New-Item -Path "docs" -ItemType Directory
-}
+if [ ! -d "docs" ]; then
+    mkdir -p docs
+fi
 
 # 生成项目总览文档
-Set-Content -Path "docs\index.md" -Value "# 项目文档"
-Add-Content -Path "docs\index.md" -Value ""
-Add-Content -Path "docs\index.md" -Value "## 项目概述"
-Add-Content -Path "docs\index.md" -Value ""
-Add-Content -Path "docs\index.md" -Value "本文档自动生成于 $(Get-Date)"
-Add-Content -Path "docs\index.md" -Value ""
+cat > docs/index.md << EOF
+# 项目文档
+
+## 项目概述
+
+本文档自动生成于 $(date)
+
+EOF
 
 # 从README提取信息（如果存在）
-if (Test-Path -Path "README.md" -PathType Leaf) {
-    Add-Content -Path "docs\index.md" -Value "## 项目说明"
-    Add-Content -Path "docs\index.md" -Value ""
-    
-    $readmeContent = Get-Content -Path "README.md" -Raw
-    $projectDescription = if ($readmeContent -match '(?s)^# .*?(?=^#|\z)') {
-        $matches[0] -replace '^# .*\r?\n', ''
-    } else { "" }
-    
-    Add-Content -Path "docs\index.md" -Value $projectDescription
-    Add-Content -Path "docs\index.md" -Value ""
-}
-
-# 生成文件结构文档
-Add-Content -Path "docs\index.md" -Value "## 文件结构"
-Add-Content -Path "docs\index.md" -Value ""
-Add-Content -Path "docs\index.md" -Value "```"
-Get-ChildItem -Path "src" -Recurse -File | ForEach-Object { $_.FullName.Replace("$pwd\", "") } | Sort-Object | Add-Content -Path "docs\index.md"
-Add-Content -Path "docs\index.md" -Value "```"
 ```
 
 #### 2. 工作流自动化规则
@@ -2014,14 +2086,37 @@ metadata:
 
 在Windows PowerShell中调整工作流自动化脚本：
 
-```powershell
+```CMD
+# Windows CMD
+@echo off
+rem 特性开始
+if "%action%"=="start" (
+    rem 确保工作区干净
+    git status --porcelain > temp.txt
+    if exist temp.txt (
+        if not "%temp.txt%"=="" (
+            echo 工作区不干净，请先提交或暂存您的更改
+            exit /b 1
+        )
+    )
+    
+    rem 更新主分支
+    git checkout main
+    git pull
+    
+    rem 创建特性分支
+    git checkout -b "feature/%featureName%"
+)
+
+# Linux/macOS
+#!/bin/bash
 # 特性开始
-if ($action -eq "start") {
+if [ "$action" = "start" ]; then
     # 确保工作区干净
-    if ((git status --porcelain)) {
-        Write-Error "工作区不干净，请先提交或暂存您的更改"
+    if [ -n "$(git status --porcelain)" ]; then
+        echo "工作区不干净，请先提交或暂存您的更改"
         exit 1
-    }
+    fi
     
     # 更新主分支
     git checkout main
@@ -2029,28 +2124,7 @@ if ($action -eq "start") {
     
     # 创建特性分支
     git checkout -b "feature/$featureName"
-    
-    # 创建特性文档
-    if (-not (Test-Path -Path ".features" -PathType Container)) {
-        New-Item -Path ".features" -ItemType Directory
-    }
-    
-    @"
-# 特性: $featureName
-
-## 描述
-<!-- 添加特性描述 -->
-
-## 任务
-- [ ] 任务1
-- [ ] 任务2
-
-## 相关问题
-<!-- 添加相关问题链接 -->
-"@ | Set-Content -Path ".features\$featureName.md"
-    
-    Write-Output "特性分支 'feature/$featureName' 已创建并设置"
-}
+fi
 ```
 
 ## 小结

@@ -43,16 +43,44 @@ CorLings (Cursor Rules Learnings) 是一套全面的、结构化的Cursor Rules�
 1. **[用户指南](CorLings/UserGuide.md)** - 提供教程使用方法、学习路径建议和最佳实践
 2. **[故障排除指南](CorLings/Troubleshooting.md)** - 收集常见错误和解决方案的参考手册
 3. **[贡献指南](CorLings/CONTRIBUTING.md)** - 说明如何为教程项目贡献内容和改进
-4. **[PDF生成脚本](CorLings/GeneratePDF.ps1)** - 用于将所有教程内容合并为PDF文档的工具
-5. **[术语表](CorLings/Glossary.md)** - Cursor Rules相关术语的定义和解释
+4. **[~~GeneratePDF.ps1~~](CorLings/GeneratePDF.ps1)** - ~~PDF生成脚本，用于将所有教程内容合并为PDF文档的工具~~(需安装 Microsoft Word)
+5. **[GeneratePDF.py](CorLings/GeneratePDF.py)** - 使用pypandoc库实现的PDF生成脚本，更简洁高效
+6. **[CorLingsPDFGenerator.exe](CorLings/CorLingsPDFGenerator.exe)** - PDF生成可执行文件，用于将所有教程内容合并为PDF文档(基于Pandoc，需安装xelatex)
+7. **[术语表](CorLings/Glossary.md)** - Cursor Rules相关术语的定义和解释
 
 这些资源文件可以帮助您更有效地使用教程内容，解决实际问题，并参与到教程的持续改进中。
+
+## 文件说明
+
+以下是项目特定文件的说明：
+
+- **[UserGuide.md](CorLings/UserGuide.md)** - 用户指南，提供教程使用方法、学习路径建议和最佳实践
+- **[Troubleshooting.md](CorLings/Troubleshooting.md)** - 故障排除指南，收集常见错误和解决方案的参考手册
+- **[CONTRIBUTING.md](CorLings/CONTRIBUTING.md)** - 贡献指南，说明如何为教程项目贡献内容和改进
+- **[~~GeneratePDF.ps1~~](CorLings/GeneratePDF.ps1)** - ~~PDF生成脚本，用于将所有教程内容合并为PDF文档的工具~~(需安装 Microsoft Word)
+- **[GeneratePDF.py](CorLings/GeneratePDF.py)** - 使用pypandoc库实现的PDF生成脚本，更简洁高效
+- **[CorLingsPDFGenerator.exe](CorLings/CorLingsPDFGenerator.exe)** - PDF生成可执行文件，用于将所有教程内容合并为PDF文档(基于Pandoc，需安装xelatex)
+- **[Glossary.md](CorLings/Glossary.md)** - 术语表，Cursor Rules相关术语的定义和解释
+
+## 使用PDF生成工具
+
+要生成完整的PDF教程文档，您需要：
+
+1. 安装Python 3.6或更高版本
+2. 安装Pandoc: 从 [https://pandoc.org/installing.html](https://pandoc.org/installing.html) 下载并安装
+3. 安装LaTeX引擎(用于PDF生成):
+   - Windows: 安装[MiKTeX](https://miktex.org/download) 或 [TeX Live](https://tug.org/texlive/windows.html)
+   - macOS: 安装[MacTeX](https://tug.org/mactex/)
+   - Linux: 安装TeX Live (`sudo apt-get install texlive-xetex texlive-fonts-recommended texlive-plain-generic`)
+4. 安装Python依赖: `pip install pypandoc`
+5. 运行PDF生成脚本: `python CorLings/GeneratePDF.py`
+
+生成的PDF文件将保存为 `CorLings-完整教程.pdf`。
 
 ## 特色内容
 
 本教程系列的特色包括：
 
-- **Windows环境适配** - 所有示例都提供Windows PowerShell版本
 - **实践导向** - 每章都包含实际可用的代码和规则示例
 - **循序渐进** - 从基础概念到高级架构的清晰学习路径
 - **丰富案例** - 真实世界中的应用案例和最佳实践

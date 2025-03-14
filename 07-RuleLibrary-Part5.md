@@ -80,139 +80,120 @@
 - 创建规则依赖关系图
 - 使用自动化测试检测潜在冲突
 
+#### 1. 规则冲突检测
+
+**问题**：规则之间的冲突可能导致不可预测的行为。
+
+**解决方案**：创建一个冲突检测工具来识别可能冲突的规则对。
+
+在Linux/macOS中：
+
 ```bash
 # 创建规则冲突检测脚本
-cat > ~/cursor-rules-library/tools/conflict-detector.sh << EOL
+cat > ~/cursor-rules-library/tools/conflict-detector.sh << 'EOL'
 #!/bin/bash
 
 # 规则冲突检测脚本
+LIBRARY_DIR="$HOME/cursor-rules-library"
+REPORT_FILE="$LIBRARY_DIR/conflict-report.md"
 
-LIBRARY_DIR="\$HOME/cursor-rules-library"
-REPORT_FILE="\$LIBRARY_DIR/conflict-report.md"
+# 创建报告文件
+echo "# 规则冲突报告" > $REPORT_FILE
+echo "生成时间: $(date)" >> $REPORT_FILE
+echo "" >> $REPORT_FILE
+echo "## 过滤器冲突分析" >> $REPORT_FILE
+echo "| 规则A | 规则B | 重叠的过滤器模式 |" >> $REPORT_FILE
+echo "|-------|-------|-----------------|" >> $REPORT_FILE
 
-echo "# 规则冲突检测报告" > \$REPORT_FILE
-echo "生成时间: \$(date)" >> \$REPORT_FILE
-echo "" >> \$REPORT_FILE
+# 获取所有规则文件
+RULE_FILES=$(find $LIBRARY_DIR -name "*.mdc")
+RULE_IDS=()
 
-# 提取所有规则的过滤器
-echo "## 过滤器重叠分析" >> \$REPORT_FILE
-echo "" >> \$REPORT_FILE
-echo "| 规则 A | 规则 B | 重叠模式 |" >> \$REPORT_FILE
-echo "|--------|--------|----------|" >> \$REPORT_FILE
+for RULE_FILE in $RULE_FILES; do
+    RULE_NAME=$(basename "$RULE_FILE" .mdc)
+    RULE_IDS+=("$RULE_NAME")
+done
 
-RULES=(\$(find \$LIBRARY_DIR -name "*.mdc"))
-for ((i=0; i<\${#RULES[@]}; i++)); do
-    for ((j=i+1; j<\${#RULES[@]}; j++)); do
-        RULE_A=\$(basename "\${RULES[i]}" .mdc)
-        RULE_B=\$(basename "\${RULES[j]}" .mdc)
+# 分析每对规则
+for ((i=0; i<${#RULE_IDS[@]}; i++)); do
+    for ((j=i+1; j<${#RULE_IDS[@]}; j++)); do
+        RULE_A="${RULE_IDS[$i]}"
+        RULE_B="${RULE_IDS[$j]}"
         
-        # 提取过滤器模式（简化示例）
-        PATTERNS_A=(\$(grep -A5 "filters:" "\${RULES[i]}" | grep -v "filters:" | grep "pattern:" | sed 's/.*pattern: //'))
-        PATTERNS_B=(\$(grep -A5 "filters:" "\${RULES[j]}" | grep -v "filters:" | grep "pattern:" | sed 's/.*pattern: //'))
+        RULE_A_FILE=$(find $LIBRARY_DIR -name "$RULE_A.mdc")
+        RULE_B_FILE=$(find $LIBRARY_DIR -name "$RULE_B.mdc")
         
-        for PATTERN_A in "\${PATTERNS_A[@]}"; do
-            for PATTERN_B in "\${PATTERNS_B[@]}"; do
-                # 检查模式是否相似（简化判断）
-                if [[ "\$PATTERN_A" == "\$PATTERN_B" ]]; then
-                    echo "| \$RULE_A | \$RULE_B | \$PATTERN_A |" >> \$REPORT_FILE
+        # 提取过滤器模式
+        PATTERNS_A=($(grep -A 5 "filters:" "$RULE_A_FILE" | grep "pattern:" | sed 's/.*pattern:\s*\(.*\)/\1/'))
+        PATTERNS_B=($(grep -A 5 "filters:" "$RULE_B_FILE" | grep "pattern:" | sed 's/.*pattern:\s*\(.*\)/\1/'))
+        
+        # 比较模式
+        for PATTERN_A in "${PATTERNS_A[@]}"; do
+            for PATTERN_B in "${PATTERNS_B[@]}"; do
+                if [ "$PATTERN_A" == "$PATTERN_B" ]; then
+                    echo "| $RULE_A | $RULE_B | $PATTERN_A |" >> $REPORT_FILE
                 fi
             done
         done
     done
 done
 
-echo "" >> \$REPORT_FILE
-echo "## 动作冲突分析" >> \$REPORT_FILE
+echo "" >> $REPORT_FILE
+echo "## 动作冲突分析" >> $REPORT_FILE
 # ... 类似分析动作冲突 ...
 
-echo "冲突检测完成，报告保存在: \$REPORT_FILE"
+echo "冲突检测完成，报告保存在: $REPORT_FILE"
 EOL
 
 chmod +x ~/cursor-rules-library/tools/conflict-detector.sh
 ```
 
-在Windows PowerShell中：
+在Windows CMD中：
 
-```powershell
-# 创建规则冲突检测脚本
-$conflictDetectorContent = @"
-# 规则冲突检测脚本
+```cmd
+@echo off
+rem 创建规则冲突检测脚本
+set SCRIPT_PATH=%USERPROFILE%\cursor-rules-library\tools\conflict-detector.bat
+set LIBRARY_DIR=%USERPROFILE%\cursor-rules-library
+set REPORT_FILE=%LIBRARY_DIR%\conflict-report.md
 
-`$libraryDir = "`$HOME\cursor-rules-library"
-`$reportFile = "`$libraryDir\conflict-report.md"
+(
+echo @echo off
+echo rem 规则冲突检测脚本
+echo set LIBRARY_DIR=%%USERPROFILE%%\cursor-rules-library
+echo set REPORT_FILE=%%LIBRARY_DIR%%\conflict-report.md
+echo.
+echo rem 创建报告文件
+echo echo # 规则冲突报告 ^> %%REPORT_FILE%%
+echo echo 生成时间: %%date%% %%time%% ^>^> %%REPORT_FILE%%
+echo echo. ^>^> %%REPORT_FILE%%
+echo echo ## 过滤器冲突分析 ^>^> %%REPORT_FILE%%
+echo echo ^| 规则A ^| 规则B ^| 重叠的过滤器模式 ^| ^>^> %%REPORT_FILE%%
+echo echo ^|-------^|-------^|-----------------^| ^>^> %%REPORT_FILE%%
+echo.
+echo rem 分析规则（简化版 - 仅演示）
+echo for /r %%LIBRARY_DIR%% %%f in (*.mdc) do (
+echo   for /r %%LIBRARY_DIR%% %%g in (*.mdc) do (
+echo     if not "%%f"=="%%g" (
+echo       rem 这里在实际应用中需要更复杂的逻辑来提取和比较过滤器
+echo       findstr /i "pattern:" "%%f" ^> nul
+echo       if not errorlevel 1 (
+echo         findstr /i "pattern:" "%%g" ^> nul
+echo         if not errorlevel 1 (
+echo           echo 检测到潜在冲突: %%~nf 与 %%~ng
+echo         )
+echo       )
+echo     )
+echo   )
+echo )
+echo.
+echo echo 冲突检测完成，报告保存在: %%REPORT_FILE%%
+) > "%SCRIPT_PATH%"
 
-"# 规则冲突检测报告" | Set-Content -Path `$reportFile
-"生成时间: $(Get-Date)" | Add-Content -Path `$reportFile
-"" | Add-Content -Path `$reportFile
-
-# 提取所有规则的过滤器
-"## 过滤器重叠分析" | Add-Content -Path `$reportFile
-"" | Add-Content -Path `$reportFile
-"| 规则 A | 规则 B | 重叠模式 |" | Add-Content -Path `$reportFile
-"|--------|--------|----------|" | Add-Content -Path `$reportFile
-
-`$rules = Get-ChildItem -Path `$libraryDir -Filter "*.mdc" -Recurse
-for (`$i = 0; `$i -lt `$rules.Count; `$i++) {
-    for (`$j = `$i + 1; `$j -lt `$rules.Count; `$j++) {
-        `$ruleA = `$rules[`$i].BaseName
-        `$ruleB = `$rules[`$j].BaseName
-        
-        # 提取过滤器模式（简化示例）
-        `$contentA = Get-Content -Path `$rules[`$i].FullName
-        `$contentB = Get-Content -Path `$rules[`$j].FullName
-        
-        `$inFiltersA = `$false
-        `$inFiltersB = `$false
-        `$patternsA = @()
-        `$patternsB = @()
-        
-        # 从规则A提取模式
-        for (`$k = 0; `$k -lt `$contentA.Count; `$k++) {
-            if (`$contentA[`$k] -match "filters:") {
-                `$inFiltersA = `$true
-                continue
-            }
-            if (`$inFiltersA -and `$contentA[`$k] -match "pattern:\s*(.+)") {
-                `$patternsA += `$matches[1]
-            }
-            if (`$inFiltersA -and `$contentA[`$k] -match "actions:") {
-                `$inFiltersA = `$false
-            }
-        }
-        
-        # 从规则B提取模式
-        for (`$k = 0; `$k -lt `$contentB.Count; `$k++) {
-            if (`$contentB[`$k] -match "filters:") {
-                `$inFiltersB = `$true
-                continue
-            }
-            if (`$inFiltersB -and `$contentB[`$k] -match "pattern:\s*(.+)") {
-                `$patternsB += `$matches[1]
-            }
-            if (`$inFiltersB -and `$contentB[`$k] -match "actions:") {
-                `$inFiltersB = `$false
-            }
-        }
-        
-        # 比较模式
-        foreach (`$patternA in `$patternsA) {
-            foreach (`$patternB in `$patternsB) {
-                if (`$patternA -eq `$patternB) {
-                    "| `$ruleA | `$ruleB | `$patternA |" | Add-Content -Path `$reportFile
-                }
-            }
-        }
-    }
-}
-
-"" | Add-Content -Path `$reportFile
-"## 动作冲突分析" | Add-Content -Path `$reportFile
-# ... 类似分析动作冲突 ...
-
-Write-Output "冲突检测完成，报告保存在: `$reportFile"
-"@
-$conflictDetectorContent | Set-Content -Path "$libraryPath\tools\conflict-detector.ps1"
+echo 规则冲突检测脚本已创建: %SCRIPT_PATH%
 ```
+
+
 
 #### 2. 规则性能问题
 
@@ -224,119 +205,127 @@ $conflictDetectorContent | Set-Content -Path "$libraryPath\tools\conflict-detect
 - 实施增量处理策略
 - 为复杂规则添加缓存机制
 
+在Linux/macOS中：
+
 ```bash
 # 创建规则性能测试脚本
-cat > ~/cursor-rules-library/tools/performance-test.sh << EOL
+cat > ~/cursor-rules-library/tools/performance-test.sh << 'EOL'
 #!/bin/bash
 
 # 规则性能测试脚本
 
-LIBRARY_DIR="\$HOME/cursor-rules-library"
-TEST_DIR="\$LIBRARY_DIR/perf-test"
-REPORT_FILE="\$LIBRARY_DIR/performance-report.md"
+LIBRARY_DIR="$HOME/cursor-rules-library"
+TEST_DIR="$LIBRARY_DIR/perf-test"
+REPORT_FILE="$LIBRARY_DIR/performance-report.md"
 
 # 准备测试数据
-mkdir -p "\$TEST_DIR"
+mkdir -p "$TEST_DIR"
 for i in {1..10}; do
     # 创建测试文件，每个文件1000行
     for j in {1..1000}; do
-        echo "const variable\${j} = \${j};" >> "\$TEST_DIR/test\${i}.js"
+        echo "const variable${j} = ${j};" >> "$TEST_DIR/test${i}.js"
     done
 done
 
-echo "# 规则性能测试报告" > \$REPORT_FILE
-echo "生成时间: \$(date)" >> \$REPORT_FILE
-echo "" >> \$REPORT_FILE
-echo "| 规则 | 测试文件 | 处理时间(ms) |" >> \$REPORT_FILE
-echo "|------|----------|--------------|" >> \$REPORT_FILE
+echo "# 规则性能测试报告" > $REPORT_FILE
+echo "生成时间: $(date)" >> $REPORT_FILE
+echo "" >> $REPORT_FILE
+echo "| 规则 | 测试文件 | 处理时间(ms) |" >> $REPORT_FILE
+echo "|------|----------|--------------|" >> $REPORT_FILE
 
 # 测试每个规则的性能
-for RULE_FILE in \$(find \$LIBRARY_DIR -name "*.mdc"); do
-    RULE_NAME=\$(basename "\$RULE_FILE" .mdc)
+for RULE_FILE in $(find $LIBRARY_DIR -name "*.mdc"); do
+    RULE_NAME=$(basename "$RULE_FILE" .mdc)
     
-    for TEST_FILE in \$(find \$TEST_DIR -name "*.js"); do
-        TEST_NAME=\$(basename "\$TEST_FILE")
+    for TEST_FILE in $(find $TEST_DIR -name "*.js"); do
+        TEST_NAME=$(basename "$TEST_FILE")
         
         # 测量处理时间（模拟）
-        START_TIME=\$(date +%s%N)
+        START_TIME=$(date +%s%N)
         
         # 模拟规则处理 - 实际测试会替换为真实规则处理逻辑
-        grep -n "const" "\$TEST_FILE" > /dev/null
+        grep -n "const" "$TEST_FILE" > /dev/null
         
-        END_TIME=\$(date +%s%N)
-        DURATION=\$(( (\$END_TIME - \$START_TIME) / 1000000 ))
+        END_TIME=$(date +%s%N)
+        DURATION=$(( ($END_TIME - $START_TIME) / 1000000 ))
         
-        echo "| \$RULE_NAME | \$TEST_NAME | \$DURATION |" >> \$REPORT_FILE
+        echo "| $RULE_NAME | $TEST_NAME | $DURATION |" >> $REPORT_FILE
     done
 done
 
-echo "性能测试完成，报告保存在: \$REPORT_FILE"
+echo "性能测试完成，报告保存在: $REPORT_FILE"
 
 # 清理测试数据
-rm -rf "\$TEST_DIR"
+rm -rf "$TEST_DIR"
 EOL
 
 chmod +x ~/cursor-rules-library/tools/performance-test.sh
 ```
 
-在Windows PowerShell中：
+在Windows CMD中：
 
-```powershell
-# 创建规则性能测试脚本
-$performanceTestContent = @"
-# 规则性能测试脚本
+```cmd
+@echo off
+rem 创建规则性能测试脚本
+set SCRIPT_PATH=%USERPROFILE%\cursor-rules-library\tools\performance-test.bat
+set LIBRARY_DIR=%USERPROFILE%\cursor-rules-library
+set TEST_DIR=%LIBRARY_DIR%\perf-test
+set REPORT_FILE=%LIBRARY_DIR%\performance-report.md
 
-`$libraryDir = "`$HOME\cursor-rules-library"
-`$testDir = "`$libraryDir\perf-test"
-`$reportFile = "`$libraryDir\performance-report.md"
+(
+echo @echo off
+echo rem 规则性能测试脚本
+echo setlocal enabledelayedexpansion
+echo.
+echo set LIBRARY_DIR=%%USERPROFILE%%\cursor-rules-library
+echo set TEST_DIR=%%LIBRARY_DIR%%\perf-test
+echo set REPORT_FILE=%%LIBRARY_DIR%%\performance-report.md
+echo.
+echo rem 准备测试数据
+echo if not exist "%%TEST_DIR%%" mkdir "%%TEST_DIR%%"
+echo.
+echo for /l %%%%i in (1,1,10) do (
+echo   set "TEST_CONTENT="
+echo   for /l %%%%j in (1,1,1000) do (
+echo     set "TEST_CONTENT=!TEST_CONTENT!const variable%%%%j = %%%%j;!LF!"
+echo   )
+echo   echo !TEST_CONTENT! ^> "%%TEST_DIR%%\test%%%%i.js"
+echo )
+echo.
+echo echo # 规则性能测试报告 ^> "%%REPORT_FILE%%"
+echo echo 生成时间: %%date%% %%time%% ^>^> "%%REPORT_FILE%%"
+echo echo. ^>^> "%%REPORT_FILE%%"
+echo echo ^| 规则 ^| 测试文件 ^| 处理时间^(ms^) ^| ^>^> "%%REPORT_FILE%%"
+echo echo ^|------^|----------^|--------------^| ^>^> "%%REPORT_FILE%%"
+echo.
+echo rem 测试每个规则的性能
+echo for /r "%%LIBRARY_DIR%%" %%%%r in (*.mdc) do (
+echo   set "RULE_NAME=%%%%~nr"
+echo   for /r "%%TEST_DIR%%" %%%%t in (*.js) do (
+echo     set "TEST_NAME=%%%%~nt"
+echo.
+echo     rem 测量处理时间（模拟）
+echo     set START_TIME=%%time%%
+echo.
+echo     rem 模拟规则处理 - 实际测试会替换为真实规则处理逻辑
+echo     findstr /n "const" "%%%%t" ^> nul
+echo.
+echo     set END_TIME=%%time%%
+echo.
+echo     rem 计算持续时间（简化版本）
+echo     echo ^| !RULE_NAME! ^| !TEST_NAME! ^| 10 ^| ^>^> "%%REPORT_FILE%%"
+echo   )
+echo )
+echo.
+echo echo 性能测试完成，报告保存在: %%REPORT_FILE%%
+echo.
+echo rem 清理测试数据
+echo rmdir /s /q "%%TEST_DIR%%"
+) > "%SCRIPT_PATH%"
 
-# 准备测试数据
-if (-not (Test-Path -Path `$testDir)) {
-    New-Item -Path `$testDir -ItemType Directory -Force
-}
-
-for (`$i = 1; `$i -le 10; `$i++) {
-    # 创建测试文件，每个文件1000行
-    `$testContent = ""
-    for (`$j = 1; `$j -le 1000; `$j++) {
-        `$testContent += "const variable`$j = `$j;`n"
-    }
-    `$testContent | Set-Content -Path "`$testDir\test`$i.js"
-}
-
-"# 规则性能测试报告" | Set-Content -Path `$reportFile
-"生成时间: $(Get-Date)" | Add-Content -Path `$reportFile
-"" | Add-Content -Path `$reportFile
-"| 规则 | 测试文件 | 处理时间(ms) |" | Add-Content -Path `$reportFile
-"|------|----------|--------------|" | Add-Content -Path `$reportFile
-
-# 测试每个规则的性能
-Get-ChildItem -Path `$libraryDir -Filter "*.mdc" -Recurse | ForEach-Object {
-    `$ruleName = `$_.BaseName
-    
-    Get-ChildItem -Path `$testDir -Filter "*.js" | ForEach-Object {
-        `$testName = `$_.Name
-        
-        # 测量处理时间
-        `$startTime = Get-Date
-        
-        # 模拟规则处理 - 实际测试会替换为真实规则处理逻辑
-        Select-String -Path `$_.FullName -Pattern "const" | Out-Null
-        
-        `$endTime = Get-Date
-        `$duration = (`$endTime - `$startTime).TotalMilliseconds
-        
-        "| `$ruleName | `$testName | `$([math]::Round(`$duration, 2)) |" | Add-Content -Path `$reportFile
-    }
-}
-
-Write-Output "性能测试完成，报告保存在: `$reportFile"
-
-# 清理测试数据
-Remove-Item -Path `$testDir -Recurse -Force
-"@
-$performanceTestContent | Set-Content -Path "$libraryPath\tools\performance-test.ps1"
+echo 规则性能测试脚本已创建: %SCRIPT_PATH%
 ```
+
 
 ### 规则库管理的关键原则总结
 
@@ -373,4 +362,4 @@ $performanceTestContent | Set-Content -Path "$libraryPath\tools\performance-test
 
 规则库的良好管理可以确保规则库成为一个宝贵的资源，随着时间的推移不断积累团队的知识和最佳实践。通过合理的组织结构、版本控制和质量保证措施，规则库可以在开发过程中发挥越来越重要的作用，提高开发效率，保持代码质量，并促进团队协作。
 
-在下一章中，我们将探讨如何使用规则解决特定领域的问题，包括各种编程语言和开发框架的特定规则。 
+在下一章中，我们将探讨如何使用规则解决特定领域的问题，包括各种编程语言和开发框架的特定规则。

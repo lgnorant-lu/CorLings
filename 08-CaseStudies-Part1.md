@@ -245,7 +245,7 @@ actions:
   - type: execute
     command: |
       # 获取组件名称
-      COMPONENT_NAME=$(grep -o -E "export\s+(default\s+)?(function|class|const)\s+(\w+)" "${file_path}" | grep -o -E "\w+$" | head -1)
+      COMPONENT_NAME=$(grep -o -E "export\s+(?:default\s+)?(function|class|const)\s+(\w+)" "${file_path}" | grep -o -E "\w+$" | head -1)
       
       # 组件文档路径
       DOCS_DIR="docs/components"
@@ -287,47 +287,39 @@ metadata:
 </rule>
 ```
 
-在Windows PowerShell中执行组件文档自动化规则的命令部分：
+组件文档自动化规则的命令部分在不同操作系统中的实现：
 
-```powershell
+```bash
+# Linux/macOS
 # 获取组件名称
-$componentName = Select-String -Path $filePath -Pattern "export\s+(default\s+)?(function|class|const)\s+(\w+)" |
-    ForEach-Object { $_.Matches.Groups[3].Value } |
-    Select-Object -First 1
+component_name=$(grep -oP "export\s+(default\s+)?(function|class|const)\s+\K(\w+)" $filePath | head -1)
 
 # 组件文档路径
-$docsDir = "docs\components"
-if (-not (Test-Path -Path $docsDir -PathType Container)) {
-    New-Item -Path $docsDir -ItemType Directory -Force
-}
+docs_dir="docs/components"
+if [ ! -d "$docs_dir" ]; then
+    mkdir -p "$docs_dir"
+fi
 
 # 检查是否存在文档文件
-$docsFile = "$docsDir\$componentName.md"
-if (-not (Test-Path -Path $docsFile -PathType Leaf)) {
-    $docContent = @"
-# $componentName
-
-## 描述
-
-[组件描述]
-
-## 属性
-
-| 属性 | 类型 | 默认值 | 描述 |
-|------|------|--------|------|
-| prop1 | string | - | 说明 |
-
-## 示例
-
-```jsx
-import { $componentName } from './components';
-
-<$componentName prop1="值" />
+docs_file="$docs_dir/$component_name.md"
 ```
-"@
-    $docContent | Set-Content -Path $docsFile
-    Write-Output "已创建组件文档模板: $docsFile"
-}
+
+```cmd
+@echo off
+REM Windows CMD
+REM 获取组件名称（简化版，实际情况需要更复杂的正则表达式处理）
+for /f "tokens=3" %%i in ('findstr /r "export.*function\|export.*class\|export.*const" "%filePath%"') do (
+    set component_name=%%i
+    goto :found_name
+)
+:found_name
+
+REM 组件文档路径
+set docs_dir=docs\components
+if not exist "%docs_dir%" mkdir "%docs_dir%"
+
+REM 检查是否存在文档文件
+set docs_file=%docs_dir%\%component_name%.md
 ```
 
 #### 4. 组件性能优化检查规则
