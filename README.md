@@ -19,34 +19,34 @@ CorLings (Cursor Rules Learnings) 是一套全面的、结构化的Cursor Rules�
 
 本教程分为10个主要章节，每个章节聚焦于Cursor Rules的特定方面：
 
-1. **[基础介绍](CorLings/01-Introduction.md)** - Cursor Rules的概念和核心理念
-2. **[基础设置与环境](CorLings/02-BasicSetup.md)** - 环境配置和初始设置
-3. **[规则组件详解](CorLings/03-RuleComponents.md)** - 过滤器、动作和元数据等核心组件
-4. **[基础规则编写](CorLings/04-BasicRules.md)** - 编写简单规则的方法和技巧
-5. **[高级规则技术](CorLings/05-AdvancedRules.md)** - 复杂规则、条件逻辑和高级组件
-6. **[工作流集成](CorLings/06-WorkflowIntegration-Part1.md)** - 将规则融入开发工作流
-7. **[规则库管理](CorLings/07-RuleLibrary-Part1.md)** - 规则的组织、版本控制和维护
-8. **[实际案例研究](CorLings/08-CaseStudies-Part1.md)** - 真实项目中的应用实例
-9. **[高级架构](CorLings/09-AdvancedArchitecture-Part1.md)** - 多代理系统和自学习规则系统
-10. **[未来发展方向](CorLings/10-FutureDirections.md)** - 新特性、趋势和学习路径
+1. **[基础介绍](./01-Introduction.md)** - Cursor Rules的概念和核心理念
+2. **[基础设置与环境](./02-BasicSetup.md)** - 环境配置和初始设置
+3. **[规则组件详解](./03-RuleComponents.md)** - 过滤器、动作和元数据等核心组件
+4. **[基础规则编写](./04-BasicRules.md)** - 编写简单规则的方法和技巧
+5. **[高级规则技术](./05-AdvancedRules.md)** - 复杂规则、条件逻辑和高级组件
+6. **[工作流集成](./06-WorkflowIntegration-Part1.md)** - 将规则融入开发工作流
+7. **[规则库管理](./07-RuleLibrary-Part1.md)** - 规则的组织、版本控制和维护
+8. **[实际案例研究](./08-CaseStudies-Part1.md)** - 真实项目中的应用实例
+9. **[高级架构](./09-AdvancedArchitecture-Part1.md)** - 多代理系统和自学习规则系统
+10. **[未来发展方向](./10-FutureDirections.md)** - 新特性、趋势和学习路径
 
 为便于阅读，一些章节被分为多个部分：
-- 第6章：[第一部分](CorLings/06-WorkflowIntegration-Part1.md) | [第二部分](CorLings/06-WorkflowIntegration-Part2.md) | [第三部分](CorLings/06-WorkflowIntegration-Part3.md)
-- 第7章：[第一部分](CorLings/07-RuleLibrary-Part1.md) | [第二部分](CorLings/07-RuleLibrary-Part2.md) | [第三部分](CorLings/07-RuleLibrary-Part3.md) | [第四部分](CorLings/07-RuleLibrary-Part4.md) | [第五部分](CorLings/07-RuleLibrary-Part5.md)
-- 第8章：[第一部分](CorLings/08-CaseStudies-Part1.md) | [第二部分](CorLings/08-CaseStudies-Part2.md) | [第三部分](CorLings/08-CaseStudies-Part3.md) | [第四部分](CorLings/08-CaseStudies-Part4.md)
-- 第9章：[第一部分](CorLings/09-AdvancedArchitecture-Part1.md) | [第二部分](CorLings/09-AdvancedArchitecture-Part2.md)
+- 第6章：[第一部分](./06-WorkflowIntegration-Part1.md) | [第二部分](./06-WorkflowIntegration-Part2.md) | [第三部分](./06-WorkflowIntegration-Part3.md)
+- 第7章：[第一部分](./07-RuleLibrary-Part1.md) | [第二部分](./07-RuleLibrary-Part2.md) | [第三部分](./07-RuleLibrary-Part3.md) | [第四部分](./07-RuleLibrary-Part4.md) | [第五部分](./07-RuleLibrary-Part5.md)
+- 第8章：[第一部分](./08-CaseStudies-Part1.md) | [第二部分](./08-CaseStudies-Part2.md) | [第三部分](./08-CaseStudies-Part3.md) | [第四部分](./08-CaseStudies-Part4.md)
+- 第9章：[第一部分](./09-AdvancedArchitecture-Part1.md) | [第二部分](./09-AdvancedArchitecture-Part2.md)
 
 ## 辅助资源
 
 除了核心教程章节外，我们还提供以下辅助资源，帮助您更好地学习和应用Cursor Rules：
 
-1. **[用户指南](CorLings/UserGuide.md)** - 提供教程使用方法、学习路径建议和最佳实践
-2. **[故障排除指南](CorLings/Troubleshooting.md)** - 收集常见错误和解决方案的参考手册
-3. **[贡献指南](CorLings/CONTRIBUTING.md)** - 说明如何为教程项目贡献内容和改进
+1. **[用户指南](./UserGuide.md)** - 提供教程使用方法、学习路径建议和最佳实践
+2. **[故障排除指南](./Troubleshooting.md)** - 收集常见错误和解决方案的参考手册
+3. **[贡献指南](./CONTRIBUTING.md)** - 说明如何为教程项目贡献内容和改进
 4. **[~~GeneratePDF.ps1~~](CorLings/GeneratePDF.ps1)** - ~~PDF生成脚本，用于将所有教程内容合并为PDF文档的工具~~(需安装 Microsoft Word)
 5. **[GeneratePDF.py](CorLings/GeneratePDF.py)** - 使用pypandoc库实现的PDF生成脚本，更简洁高效
-6. **[CorLingsPDFGenerator.exe](CorLings/CorLingsPDFGenerator.exe)** - PDF生成可执行文件，用于将所有教程内容合并为PDF文档(基于Pandoc，需安装xelatex)
-7. **[术语表](CorLings/Glossary.md)** - Cursor Rules相关术语的定义和解释
+6. **[CorLingsPDFGenerator.exe](./CorLingsPDFGenerator.exe)** - PDF生成可执行文件，用于将所有教程内容合并为PDF文档(基于Pandoc，需安装xelatex)
+7. **[术语表](./Glossary.md)** - Cursor Rules相关术语的定义和解释
 
 这些资源文件可以帮助您更有效地使用教程内容，解决实际问题，并参与到教程的持续改进中。
 
@@ -54,13 +54,13 @@ CorLings (Cursor Rules Learnings) 是一套全面的、结构化的Cursor Rules�
 
 以下是项目特定文件的说明：
 
-- **[UserGuide.md](CorLings/UserGuide.md)** - 用户指南，提供教程使用方法、学习路径建议和最佳实践
-- **[Troubleshooting.md](CorLings/Troubleshooting.md)** - 故障排除指南，收集常见错误和解决方案的参考手册
-- **[CONTRIBUTING.md](CorLings/CONTRIBUTING.md)** - 贡献指南，说明如何为教程项目贡献内容和改进
-- **[~~GeneratePDF.ps1~~](CorLings/GeneratePDF.ps1)** - ~~PDF生成脚本，用于将所有教程内容合并为PDF文档的工具~~(需安装 Microsoft Word)
-- **[GeneratePDF.py](CorLings/GeneratePDF.py)** - 使用pypandoc库实现的PDF生成脚本，更简洁高效
-- **[CorLingsPDFGenerator.exe](CorLings/CorLingsPDFGenerator.exe)** - PDF生成可执行文件，用于将所有教程内容合并为PDF文档(基于Pandoc，需安装xelatex)
-- **[Glossary.md](CorLings/Glossary.md)** - 术语表，Cursor Rules相关术语的定义和解释
+- **[UserGuide.md](./UserGuide.md)** - 用户指南，提供教程使用方法、学习路径建议和最佳实践
+- **[Troubleshooting.md](./Troubleshooting.md)** - 故障排除指南，收集常见错误和解决方案的参考手册
+- **[CONTRIBUTING.md](./CONTRIBUTING.md)** - 贡献指南，说明如何为教程项目贡献内容和改进
+- **[~~GeneratePDF.ps1~~](./GeneratePDF.ps1)** - ~~PDF生成脚本，用于将所有教程内容合并为PDF文档的工具~~(需安装 Microsoft Word)
+- **[GeneratePDF.py](./GeneratePDF.py)** - 使用pypandoc库实现的PDF生成脚本，更简洁高效
+- **[CorLingsPDFGenerator.exe](./CorLingsPDFGenerator.exe)** - PDF生成可执行文件，用于将所有教程内容合并为PDF文档(基于Pandoc，需安装xelatex)
+- **[Glossary.md](./Glossary.md)** - 术语表，Cursor Rules相关术语的定义和解释
 
 ## 使用PDF生成工具
 
@@ -119,4 +119,4 @@ CorLings (Cursor Rules Learnings) 是一套全面的、结构化的Cursor Rules�
 
 ---
 
-开始您的Cursor Rules学习之旅，点击 [基础介绍](CorLings/01-Introduction.md) 章节！ 
+开始您的Cursor Rules学习之旅，点击 [基础介绍](./01-Introduction.md) 章节！ 
